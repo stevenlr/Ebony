@@ -2,10 +2,12 @@
 
 in vec3 iPosition;
 
+uniform mat4 uMvp;
+
 out vec3 vPosition;
 
 void main()
 {
-	gl_Position = vec4(iPosition, 1);
-	vPosition = gl_Position.xyz;
+	gl_Position = uMvp * vec4(iPosition, 1);
+	vPosition = iPosition;
 }

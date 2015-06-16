@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <stb_image.h>
 
+#include "graphics/TransformPipeline.h"
 #include "graphics/opengl/opengl.h"
 #include "utils/io.h"
 
@@ -37,9 +38,15 @@ int main(int argc, char *argv[])
 	SDL_GL_MakeCurrent(window, glContext);
 	SDL_GL_SetSwapInterval(1);
 
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
+	glClearColor(0, 0, 0, 1);
+
 	bool running = true;
 
-	float triangleData[] = {0, 0, 0, 0, 1, 0, 1, 0, 0};
+	float triangleData[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0};
 
 	shared_ptr<gl::VertexArray> vao(new gl::VertexArray());
 	shared_ptr<gl::Buffer> posBuffer(new gl::Buffer());
@@ -48,7 +55,7 @@ int main(int argc, char *argv[])
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, *posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9, triangleData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18, triangleData, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	string source, error;
@@ -76,13 +83,20 @@ int main(int argc, char *argv[])
 
 	gl::generateMipmaps(*texture);
 
-	GLint uniform = glGetUniformLocation(*program, "uTexture");
+	TransformPipeline pipeline;
 
-	glUniform1i(uniform, 0);
+	pipeline.perspective(70, 1280, 720, 0.1f, 1000);
+
+	GLint uniformTexture = glGetUniformLocation(*program, "uTexture");
+	GLint uniformMvp = glGetUniformLocation(*program, "uMvp");
+
+	glUniform1i(uniformTexture, 0);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, *texture);
 	glBindSampler(0, *sampler);
+
+	float t = 0;
 
 	while (running) {
 		SDL_Event event;
@@ -93,7 +107,16 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		t += 0.01f;
+
+		pipeline.identity().scale(2).translate(-0.5, -0.5, 0);
+
+		pipeline.lookat(glm::vec3(cos(t) * 2, sin(t) * 2, 1), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+		glUniformMatrix4fv(uniformMvp, 1, GL_FALSE, glm::value_ptr(pipeline.getMvp()));
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		SDL_GL_SwapWindow(window);
 	}
