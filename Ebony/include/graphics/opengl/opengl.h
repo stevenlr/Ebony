@@ -4,5 +4,6 @@
 #include "Enums.h"
 #include "Object.h"
 #include "shaders_utils.h"
+#include "textures_utils.h"
 
 #endif

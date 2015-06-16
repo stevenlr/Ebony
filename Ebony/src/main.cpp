@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
+#include <stb_image.h>
 
 #include "graphics/opengl/opengl.h"
 #include "utils/io.h"
@@ -61,6 +62,28 @@ int main(int argc, char *argv[])
 
 	glUseProgram(*program);
 
+	shared_ptr<gl::Sampler> sampler(new gl::Sampler());
+	shared_ptr<gl::Texture> texture(new gl::Texture());
+
+	glSamplerParameteri(*sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glSamplerParameteri(*sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glSamplerParameteri(*sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glSamplerParameteri(*sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	if (!gl::loadTextureFromFile(*texture, "assets/textures/uvgrid1024-color.png", error)) {
+		cerr << error << endl;
+	}
+
+	gl::generateMipmaps(*texture);
+
+	GLint uniform = glGetUniformLocation(*program, "uTexture");
+
+	glUniform1i(uniform, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, *texture);
+	glBindSampler(0, *sampler);
+
 	while (running) {
 		SDL_Event event;
 
@@ -75,6 +98,7 @@ int main(int argc, char *argv[])
 		SDL_GL_SwapWindow(window);
 	}
 
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glUseProgram(0);
 
 	SDL_GL_DeleteContext(glContext);
