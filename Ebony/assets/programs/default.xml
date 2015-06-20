@@ -3,5 +3,6 @@
 	<shader type="vertex">default</shader>
 	<shader type="fragment">default</shader>
 	<attribute index="0">iPosition</attribute>
+	<attribute index="1">iNormal</attribute>
 	<fragdata index="0">oColor</fragdata>
 </program>

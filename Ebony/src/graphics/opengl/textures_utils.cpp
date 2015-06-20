@@ -31,7 +31,7 @@ namespace ebony { namespace gl {
 		switch (components) {
 			case 1:
 				internalFormat = GL_R8;
-				format = GL_R;
+				format = GL_RED;
 				break;
 			case 2:
 				internalFormat = GL_RG8;
