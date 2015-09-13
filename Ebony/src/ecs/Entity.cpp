@@ -1,28 +1,23 @@
 #include "ecs/ecs.h"
 
+using namespace std;
+
 namespace ebony { namespace ecs {
 
-	Entity::Entity() : _id(0), _version(0)
-	{}
-
-	Entity::Entity(EntityManager *manager, EntityId id, EntityVersion version) :
+	Entity::Entity(std::shared_ptr<EntityManager> manager, EntityId id, EntityVersion version) :
 		_id(id), _version(version), _manager(manager)
 	{}
 
-	Entity::Entity(const Entity &entity) :
-		_id(entity._id), _version(entity._version), _manager(entity._manager)
-	{}
-
-	Entity &Entity::operator=(const Entity &entity)
-	{
-		_id = entity._id;
-		_version = entity._version;
-		_manager = entity._manager;
-	}
-
 	bool Entity::operator==(const Entity &entity) const
 	{
-		return _version == entity._version && _id == entity._id && _manager == entity._manager;
+		shared_ptr<EntityManager> manager1 = _manager.lock();
+		shared_ptr<EntityManager> manager2 = entity._manager.lock();
+
+		if (!manager1 || !manager2) {
+			return false;
+		}
+
+		return _version == entity._version && _id == entity._id && manager1 == manager2;
 	}
 
 	bool Entity::operator!=(const Entity &entity) const
@@ -37,18 +32,22 @@ namespace ebony { namespace ecs {
 
 	bool Entity::isValid() const
 	{
-		if (!_manager) {
+		shared_ptr<EntityManager> manager = _manager.lock();
+
+		if (!manager) {
 			return false;
 		}
 
-		return _manager->isEntityValid(*this);
+		return manager->isEntityValid(*this);
 	}
 
 	void Entity::destroy()
 	{
-		if (_manager) {
-			_manager->destroy(*this);
-			_manager = nullptr;
+		shared_ptr<EntityManager> manager = _manager.lock();
+
+		if (manager) {
+			manager->destroy(*this);
+			_manager.reset();
 		}
 	}
 

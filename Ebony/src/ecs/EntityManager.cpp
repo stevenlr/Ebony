@@ -6,6 +6,11 @@ using namespace std;
 
 namespace ebony { namespace ecs {
 
+	shared_ptr<EntityManager> EntityManager::makeInstance()
+	{
+		return shared_ptr<EntityManager>(new EntityManager());
+	}
+
 	Entity EntityManager::create()
 	{
 		EntityId id;
@@ -25,18 +30,18 @@ namespace ebony { namespace ecs {
 			version = _entityVersion[id];
 		}
 
-		return Entity(this, id, version);
+		return Entity(shared_from_this(), id, version);
 	}
 
 	void EntityManager::destroy(Entity &entity)
 	{
-		if (!entity) {
+		if (!entity || entity._manager.lock() != shared_from_this()) {
 			return;
 		}
 
 		++_entityVersion[entity._id];
 		_freeList.push_back(entity._id);
-		entity._manager = nullptr;
+		entity._manager.reset();
 	}
 
 	bool EntityManager::isEntityValid(const Entity &entity) const
