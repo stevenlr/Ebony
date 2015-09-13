@@ -2,6 +2,7 @@
 #define EBONY_ECS_CONSTANTS_H_
 
 #include <cstdint>
+#include <bitset>
 
 namespace ebony { namespace ecs {
 
@@ -13,6 +14,7 @@ namespace ebony { namespace ecs {
 
 	typedef uint32_t EntityId;
 	typedef uint32_t EntityVersion;
+	typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
 }
 }

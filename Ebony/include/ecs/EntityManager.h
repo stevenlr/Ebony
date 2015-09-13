@@ -1,7 +1,6 @@
 #ifndef EBONY_ECS_ENTITY_MANAGER_H_
 #define EBONY_ECS_ENTITY_MANAGER_H_
 
-#include <bitset>
 #include <vector>
 #include <memory>
 
@@ -12,8 +11,6 @@ namespace ebony { namespace ecs {
 
 	class EntityManager : public std::enable_shared_from_this<EntityManager> {
 	public:
-		typedef std::bitset<MAX_COMPONENTS> ComponentMask;
-
 		EntityManager(const EntityManager &manager) = delete;
 		EntityManager &operator=(const EntityManager &manager) = delete;
 
