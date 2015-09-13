@@ -1,5 +1,5 @@
-#ifndef EBONY_GRAPHICS_OPENGL_OPENGL_OBJECT_H_
-#define EBONY_GRAPHICS_OPENGL_OPENGL_OBJECT_H_
+#ifndef EBONY_GRAPHICS_OPENGL_OBJECT_H_
+#define EBONY_GRAPHICS_OPENGL_OBJECT_H_
 
 #include <GL/glew.h>
 
@@ -8,149 +8,149 @@
 namespace ebony { namespace gl {
 
 	struct BufferTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
-			value_type object;
+			ValueType object;
 			glGenBuffers(1, &object);
 			return object;
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteBuffers(1, &object);
 		}
 	};
 
 	struct VertexArrayTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
-			value_type object;
+			ValueType object;
 			glGenVertexArrays(1, &object);
 			return object;
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteVertexArrays(1, &object);
 		}
 	};
 
 	struct FramebufferTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
-			value_type object;
+			ValueType object;
 			glGenFramebuffers(1, &object);
 			return object;
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteFramebuffers(1, &object);
 		}
 	};
 
 	struct RenderbufferTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
-			value_type object;
+			ValueType object;
 			glGenRenderbuffers(1, &object);
 			return object;
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteRenderbuffers(1, &object);
 		}
 	};
 
 	struct TextureTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
-			value_type object;
+			ValueType object;
 			glGenTextures(1, &object);
 			return object;
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteTextures(1, &object);
 		}
 	};
 
 	struct SamplerTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
-			value_type object;
+			ValueType object;
 			glGenSamplers(1, &object);
 			return object;
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteSamplers(1, &object);
 		}
 	};
 
 	struct QueryTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
-			value_type object;
+			ValueType object;
 			glGenQueries(1, &object);
 			return object;
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteQueries(1, &object);
 		}
 	};
 
 	struct ProgramTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create()
+		static ValueType create()
 		{
 			return glCreateProgram();
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteProgram(object);
 		}
 	};
 
 	struct ShaderTraits {
-		typedef GLuint value_type;
-		static const value_type null_value = 0;
+		typedef GLuint ValueType;
+		static const ValueType nullValue = 0;
 
-		static value_type create(ShaderType type)
+		static ValueType create(ShaderType type)
 		{
 			return glCreateShader(type);
 		}
 
-		static void destroy(value_type object)
+		static void destroy(ValueType object)
 		{
 			glDeleteShader(object);
 		}
@@ -163,8 +163,8 @@ namespace ebony { namespace gl {
 		Object(const Object<T> &obj) : _obj(obj._obj) {}
 		~Object() { T::destroy(_obj); }
 
-		operator typename T::value_type() const { return _obj; }
-		operator bool() const { return _obj != T::null_value; }
+		operator typename T::ValueType() const { return _obj; }
+		operator bool() const { return _obj != T::nullValue; }
 
 		Object<T> &operator=(const Object<T> &obj)
 		{
@@ -173,7 +173,7 @@ namespace ebony { namespace gl {
 		}
 
 	private:
-		typename T::value_type _obj;
+		typename T::ValueType _obj;
 	};
 	
 	template<>
@@ -183,8 +183,8 @@ namespace ebony { namespace gl {
 		Object(const Object<ShaderTraits> &obj) : _obj(obj._obj) {}
 		~Object() { ShaderTraits::destroy(_obj); }
 
-		operator ShaderTraits::value_type() const { return _obj; }
-		operator bool() const { return _obj != ShaderTraits::null_value; }
+		operator ShaderTraits::ValueType() const { return _obj; }
+		operator bool() const { return _obj != ShaderTraits::nullValue; }
 
 		Object<ShaderTraits> &operator=(const Object<ShaderTraits> &obj)
 		{
@@ -193,7 +193,7 @@ namespace ebony { namespace gl {
 		}
 
 	private:
-		ShaderTraits::value_type _obj;
+		ShaderTraits::ValueType _obj;
 	};
 
 	typedef Object<BufferTraits> Buffer;
