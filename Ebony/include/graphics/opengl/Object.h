@@ -3,7 +3,7 @@
 
 #include <GL/glew.h>
 
-#include "Enums.h"
+#include "enums.h"
 
 namespace ebony { namespace gl {
 
