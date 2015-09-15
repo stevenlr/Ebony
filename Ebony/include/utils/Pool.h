@@ -8,8 +8,17 @@ using namespace std;
 
 namespace ebony {
 
+	class IPool {
+	public:
+		virtual ~IPool()
+		{}
+
+		virtual void *allocate() = 0;
+		virtual void free(void *ptr) = 0;
+	};
+
 	template<typename T>
-	class Pool {
+	class Pool : IPool {
 	public:
 		Pool(size_t incrementSize = 256) :
 			_incrementSize(incrementSize)
@@ -22,7 +31,7 @@ namespace ebony {
 			}
 		}
 
-		T *allocate()
+		void *allocate() override
 		{
 			if (_freeList.size() == 0) {
 				grow();
@@ -34,9 +43,9 @@ namespace ebony {
 			return ptr;
 		}
 
-		void free(const T *ptr)
+		void free(void *ptr) override
 		{
-			_freeList.push_back(ptr);
+			_freeList.push_back(static_cast<T *>(ptr));
 		}
 
 	private:

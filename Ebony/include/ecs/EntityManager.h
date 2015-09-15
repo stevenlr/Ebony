@@ -6,6 +6,7 @@
 
 #include "constants.h"
 #include "Entity.h"
+#include "utils/Pool.h"
 
 namespace ebony { namespace ecs {
 
@@ -17,17 +18,21 @@ namespace ebony { namespace ecs {
 		static std::shared_ptr<EntityManager> makeInstance();
 
 		Entity create();
-		void destroy(Entity &entity);
 		bool isEntityValid(const Entity &entity) const;
 
 	private:
+		friend Entity;
+
 		EntityManager() = default;
 
+		void destroy(Entity &entity);
 		void growCapacity();
 
 		EntityId _nextEntity = 0;
 		std::vector<EntityId> _freeList;
 		std::vector<EntityVersion> _entityVersion;
+		std::vector<ComponentMask> _componentMasks;
+		std::vector<IPool *> _componentPools;
 	};
 
 }

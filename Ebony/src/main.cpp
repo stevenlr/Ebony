@@ -42,8 +42,11 @@ void testECS()
 	cout << e3.isValid() << endl;
 
 	Pool<int> pool;
+	IPool *pool2 = reinterpret_cast<IPool *>(&pool);
 
-	int *a = pool.allocate();
+	int *a = static_cast<int *>(pool2->allocate());
+
+	pool2->free(a);
 
 	*a = 42;
 
