@@ -10,7 +10,12 @@ namespace {
 	float noise(int x, int y, int o, int seed)
 	{
 		uint32_t hash = 0;
-		uint32_t key[4] = {seed, x, y, o};
+		uint32_t key[4] = {
+			static_cast<uint32_t>(seed),
+			static_cast<uint32_t>(x),
+			static_cast<uint32_t>(y),
+			static_cast<uint32_t>(o)
+		};
 		int i = 0;
 
 		for (i = 0; i < 4; i++) {

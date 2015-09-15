@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <cassert>
 
 #include "constants.h"
 #include "Entity.h"
@@ -24,6 +25,9 @@ namespace ebony { namespace ecs {
 		inline int getComponentId()
 		{
 			static int id = _nbComponentTypes++;
+
+			assert(id < MAX_COMPONENTS);
+
 			return id;
 		}
 
