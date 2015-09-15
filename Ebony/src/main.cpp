@@ -19,36 +19,18 @@ using namespace ebony;
 
 void testECS()
 {
-	shared_ptr<ecs::EntityManager> manager = ecs::EntityManager::makeInstance();
+	shared_ptr<ecs::EntityManager> m1 = ecs::EntityManager::makeInstance();
+	shared_ptr<ecs::EntityManager> m2 = ecs::EntityManager::makeInstance();
 
-	ecs::Entity e1 = manager->create();
-	ecs::Entity e2 = manager->create();
-	ecs::Entity e3 = e1;
+	cout << m1->getComponentId<int>() << endl;
+	cout << m1->getComponentId<int>() << endl;
+	cout << m1->getComponentId<float>() << endl;
+	cout << m1->getComponentId<float>() << endl;
 
-	cout << e1.isValid() << endl;
-	cout << e2.isValid() << endl;
-	cout << e3.isValid() << endl;
-
-	e1.destroy();
-
-	cout << e1.isValid() << endl;
-	cout << e2.isValid() << endl;
-	cout << e3.isValid() << endl;
-
-	e3 = manager->create();
-
-	cout << e1.isValid() << endl;
-	cout << e2.isValid() << endl;
-	cout << e3.isValid() << endl;
-
-	Pool<int> pool;
-	IPool *pool2 = reinterpret_cast<IPool *>(&pool);
-
-	int *a = static_cast<int *>(pool2->allocate());
-
-	pool2->free(a);
-
-	*a = 42;
+	cout << m2->getComponentId<int>() << endl;
+	cout << m2->getComponentId<int>() << endl;
+	cout << m2->getComponentId<float>() << endl;
+	cout << m2->getComponentId<float>() << endl;
 
 	cout << "ok" << endl;
 }

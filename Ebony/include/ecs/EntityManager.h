@@ -20,6 +20,13 @@ namespace ebony { namespace ecs {
 		Entity create();
 		bool isEntityValid(const Entity &entity) const;
 
+		template<typename T>
+		inline int getComponentId()
+		{
+			static int id = _nbComponentTypes++;
+			return id;
+		}
+
 	private:
 		friend Entity;
 
@@ -28,11 +35,13 @@ namespace ebony { namespace ecs {
 		void destroy(Entity &entity);
 		void growCapacity();
 
+		int _nbComponentTypes = 0;
 		EntityId _nextEntity = 0;
 		std::vector<EntityId> _freeList;
 		std::vector<EntityVersion> _entityVersion;
 		std::vector<ComponentMask> _componentMasks;
 		std::vector<IPool *> _componentPools;
+		std::vector<std::vector<void *>> _components;
 	};
 
 }
