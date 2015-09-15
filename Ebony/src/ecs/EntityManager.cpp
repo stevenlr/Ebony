@@ -63,7 +63,7 @@ namespace ebony { namespace ecs {
 			newSize = 256;
 		}
 
-		_entityVersion.resize(newSize);
+		_entityVersion.resize(newSize, 0);
 	}
 
 }
