@@ -40,6 +40,7 @@ namespace ebony { namespace ecs {
 		}
 
 		++_entityVersion[entity._id];
+		_componentMasks[entity._id].reset();
 		_freeList.push_back(entity._id);
 		entity._manager.reset();
 	}
@@ -64,6 +65,23 @@ namespace ebony { namespace ecs {
 		}
 
 		_entityVersion.resize(newSize, 0);
+		_componentMasks.resize(newSize, ComponentMask());
+
+		for (vector<void *> components : _components) {
+			components.resize(newSize, nullptr);
+		}
+	}
+
+	void EntityManager::accomodateComponents()
+	{
+		size_t oldSize = _componentPools.size();
+
+		_componentPools.resize(_nbComponentTypes, nullptr);
+		_components.resize(_nbComponentTypes);
+
+		for (unsigned int i = oldSize; i < _nbComponentTypes; ++i) {
+			_components[i].resize(_componentMasks.size(), nullptr);
+		}
 	}
 
 }

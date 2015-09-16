@@ -16,23 +16,28 @@
 
 using namespace std;
 using namespace ebony;
+using namespace ecs;
 
 void testECS()
 {
 	shared_ptr<ecs::EntityManager> m1 = ecs::EntityManager::makeInstance();
 	shared_ptr<ecs::EntityManager> m2 = ecs::EntityManager::makeInstance();
 
-	cout << m1->getComponentId<int>() << endl;
-	cout << m1->getComponentId<int>() << endl;
-	cout << m1->getComponentId<float>() << endl;
-	cout << m1->getComponentId<float>() << endl;
+	Entity e1 = m1->create();
+	Entity e2 = m2->create();
 
-	cout << m2->getComponentId<int>() << endl;
-	cout << m2->getComponentId<int>() << endl;
-	cout << m2->getComponentId<float>() << endl;
-	cout << m2->getComponentId<float>() << endl;
+	e1.addComponent<float>();
+	e1.addComponent<int>();
+	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
 
-	cout << "ok" << endl;
+	e1.getComponent<float>().remove();
+	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
+
+	e1.removeComponent<int>();
+	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
+
+	e1.addComponent<float>();
+	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
 }
 
 int main(int argc, char *argv[])

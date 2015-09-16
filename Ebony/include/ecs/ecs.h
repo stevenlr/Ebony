@@ -4,5 +4,6 @@
 #include "constants.h"
 #include "EntityManager.h"
 #include "Entity.h"
+#include "Component.h"
 
 #endif
