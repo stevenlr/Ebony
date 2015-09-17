@@ -34,7 +34,7 @@ namespace ebony { namespace ecs {
 		template<typename T>
 		inline unsigned int getComponentId()
 		{
-			static unsigned int id = _nbComponentTypes++;
+			const static unsigned int id = _nbComponentTypes++;
 
 			assert(id < MAX_COMPONENTS);
 
@@ -52,35 +52,38 @@ namespace ebony { namespace ecs {
 		}
 
 		template<typename T>
-		inline bool hasComponents_(const Entity &entity)
+		inline void createComponentMask(ComponentMask &mask)
 		{
-			return _componentMasks[entity._id][getComponentId<T>()];
+			mask.set(getComponentId<T>());
 		}
 
 		template<typename T1, typename T2, typename ... Ts>
-		inline bool hasComponents_(const Entity &entity)
+		inline void createComponentMask(ComponentMask &mask)
 		{
-			return hasComponents_<T1>(entity) && hasComponents_<T2, Ts ...>(entity);
+			mask.set(getComponentId<T1>());
+			createComponentMask<T2, Ts ...>(mask);
 		}
 
-		template<typename T>
+		template<typename ... Ts>
+		inline ComponentMask createComponentMask()
+		{
+			static ComponentMask mask;
+
+			createComponentMask<Ts ...>(mask);
+
+			return mask;
+		}
+
+		template<typename ... Ts>
 		inline bool hasComponents(const Entity &entity)
 		{
 			if (!isEntityValid(entity)) {
 				return false;
 			}
 
-			return hasComponents_<T>(entity);
-		}
+			static const ComponentMask compMask = createComponentMask<Ts ...>();
 
-		template<typename T1, typename T2, typename ... Ts>
-		inline bool hasComponents(const Entity &entity)
-		{
-			if (!isEntityValid(entity)) {
-				return false;
-			}
-
-			return hasComponents_<T1, T2, Ts ...>(entity);
+			return (_componentMasks[entity._id] & compMask) == compMask;
 		}
 
 		template<typename T>
