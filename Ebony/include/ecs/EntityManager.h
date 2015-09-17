@@ -111,7 +111,7 @@ namespace ebony { namespace ecs {
 
 			T *componentPtr = static_cast<T *>(pool->allocate());
 
-			_componentMasks[entity._id][id] = true;
+			_componentMasks[entity._id].set(id);
 			_components[id][entity._id] = componentPtr;
 
 			return Component<T>(entity, componentPtr);
@@ -158,7 +158,7 @@ namespace ebony { namespace ecs {
 			Pool<T> *pool = static_cast<Pool<T> *>(_componentPools[id]);
 
 			pool->free(componentPtr);
-			_componentMasks[entity._id][id] = false;
+			_componentMasks[entity._id].reset(id);
 			_components[id][entity._id] = nullptr;
 		}
 
@@ -169,6 +169,68 @@ namespace ebony { namespace ecs {
 		std::vector<ComponentMask> _componentMasks;
 		std::vector<IPool *> _componentPools;
 		std::vector<std::vector<void *>> _components;
+
+	public:
+		class Iterator {
+		public:
+			Iterator(const Iterator &it);
+
+			Iterator &operator=(const Iterator &it);
+
+			bool operator==(const Iterator &it);
+			bool operator!=(const Iterator &it);
+
+			Entity operator*() const;
+			Iterator &operator++();
+
+			EntityId _current;
+
+		private:
+			friend EntityManager;
+
+			Iterator() = default;
+			Iterator(std::weak_ptr<EntityManager> manager,
+					 const ComponentMask &mask,
+					 EntityId current = 0);
+
+			void goToFirstValid();
+
+			ComponentMask _mask;
+			std::weak_ptr<EntityManager> _manager;
+			
+		};
+
+		class EntityView {
+		public:
+			EntityView(const EntityView &view) = default;
+
+			EntityView &operator=(const EntityView &view) = default;
+
+			Iterator begin();
+			Iterator end();
+
+			const Iterator begin() const;
+			const Iterator end() const;
+
+		private:
+			friend EntityManager;
+
+			EntityView() = default;
+			EntityView(std::shared_ptr<EntityManager> manager, const ComponentMask &mask);
+
+			ComponentMask _mask;
+			std::weak_ptr<EntityManager> _manager;
+		};
+
+		template<typename ... Ts>
+		EntityView getEntitiesWith()
+		{
+			return EntityView(shared_from_this(), createComponentMask<Ts ...>());
+		}
+
+	private:
+		friend EntityView;
+		friend Iterator;
 	};
 
 }

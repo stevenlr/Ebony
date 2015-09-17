@@ -16,6 +16,7 @@ namespace ebony { namespace ecs {
 	public:
 		Entity() = default;
 		Entity(std::shared_ptr<EntityManager> manager, EntityId id, EntityVersion version);
+		Entity(std::weak_ptr<EntityManager> manager, EntityId id, EntityVersion version);
 		Entity(const Entity &entity) = default;
 
 		Entity &operator=(const Entity &entity) = default;

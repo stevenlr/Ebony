@@ -8,6 +8,10 @@ namespace ebony { namespace ecs {
 		_id(id), _version(version), _manager(manager)
 	{}
 
+	Entity::Entity(std::weak_ptr<EntityManager> manager, EntityId id, EntityVersion version) :
+		_id(id), _version(version), _manager(manager)
+	{}
+
 	bool Entity::operator==(const Entity &entity) const
 	{
 		shared_ptr<EntityManager> manager1 = _manager.lock();

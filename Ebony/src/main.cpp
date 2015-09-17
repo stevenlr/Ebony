@@ -24,20 +24,35 @@ void testECS()
 	shared_ptr<ecs::EntityManager> m2 = ecs::EntityManager::makeInstance();
 
 	Entity e1 = m1->create();
-	Entity e2 = m2->create();
+	Entity e2 = m1->create();
 
 	e1.addComponent<float>();
 	e1.addComponent<int>();
-	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
 
-	e1.getComponent<float>().remove();
-	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
+	*(e1.getComponent<float>().get()) = 1;
+	*(e1.getComponent<int>().get()) = 1;
 
-	e1.removeComponent<int>();
-	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
+	e2.addComponent<float>();
+	e2.addComponent<char>();
 
-	e1.addComponent<float>();
-	cout << e1.hasComponent<float>() << " " << e1.hasComponent<int>() << " " << e1.hasComponents<int, float>() << endl;
+	*(e2.getComponent<float>().get()) = 2;
+	*(e2.getComponent<char>().get()) = 'b';
+
+	for (Entity e : m1->getEntitiesWith<float>()) {
+		cout << *(e.getComponent<float>().get()) << endl;
+	}
+
+	cout << endl;
+
+	for (Entity e : m1->getEntitiesWith<float, int>()) {
+		cout << *(e.getComponent<float>().get()) << endl;
+	}
+
+	cout << endl;
+
+	for (Entity e : m1->getEntitiesWith<char>()) {
+		cout << *(e.getComponent<char>().get()) << endl;
+	}
 }
 
 int main(int argc, char *argv[])

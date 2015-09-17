@@ -1,6 +1,7 @@
 #include "ecs/ecs.h"
 
 #include <limits>
+#include <stdexcept>
 
 using namespace std;
 
@@ -82,6 +83,103 @@ namespace ebony { namespace ecs {
 		for (unsigned int i = oldSize; i < _nbComponentTypes; ++i) {
 			_components[i].resize(_componentMasks.size(), nullptr);
 		}
+	}
+
+	EntityManager::Iterator::Iterator(const EntityManager::Iterator &it) :
+		_mask(it._mask), _current(it._current), _manager(it._manager)
+	{
+		goToFirstValid();
+	}
+
+	EntityManager::Iterator &EntityManager::Iterator::operator=(const EntityManager::Iterator &it)
+	{
+		_mask = it._mask;
+		_manager = it._manager;
+		_current = it._current;
+		goToFirstValid();
+	}
+
+	EntityManager::Iterator::Iterator(weak_ptr<EntityManager> manager,
+									  const ComponentMask &mask,
+									  EntityId current) :
+		_mask(mask), _manager(manager), _current(current)
+	{
+		goToFirstValid();
+	}
+
+	bool EntityManager::Iterator::operator==(const EntityManager::Iterator &it)
+	{
+		return _mask == it._mask
+			&& _current == it._current
+			&& _manager.lock() == it._manager.lock();
+	}
+
+	bool EntityManager::Iterator::operator!=(const EntityManager::Iterator &it)
+	{
+		return _mask != it._mask
+			|| _current != it._current
+			|| _manager.lock() != it._manager.lock();
+	}
+
+	Entity EntityManager::Iterator::operator*() const
+	{
+		return Entity(_manager, _current, _manager.lock()->_entityVersion[_current]);
+	}
+
+	EntityManager::Iterator &EntityManager::Iterator::operator++()
+	{
+		if (_current < _manager.lock()->_nextEntity) {
+			_current++;
+			goToFirstValid();
+		}
+
+		return *this;
+	}
+
+	void EntityManager::Iterator::goToFirstValid()
+	{
+		shared_ptr<EntityManager> manager = _manager.lock();
+
+		while (_current < manager->_nextEntity) {
+			if ((manager->_componentMasks[_current] & _mask) == _mask) {
+				break;
+			}
+
+			_current++;
+		}
+	}
+
+	EntityManager::EntityView::EntityView(shared_ptr<EntityManager> manager,
+										  const ComponentMask &mask) :
+		_mask(mask), _manager(manager)
+	{}
+
+	EntityManager::Iterator EntityManager::EntityView::begin()
+	{
+		return EntityManager::Iterator(_manager, _mask);
+	}
+
+	EntityManager::Iterator EntityManager::EntityView::end()
+	{
+		if (!_manager.lock()) {
+			throw runtime_error("Reference to manager expired");
+		}
+
+		return EntityManager::Iterator(_manager, _mask, _manager.lock()->_nextEntity);
+	}
+
+	const EntityManager::Iterator EntityManager::EntityView::begin() const
+	{
+		return EntityManager::Iterator(_manager, _mask);
+	}
+
+	const EntityManager::Iterator EntityManager::EntityView::end() const
+	{
+		if (!_manager.lock()) {
+			throw runtime_error("Reference to manager expired");
+		}
+
+		return EntityManager::Iterator(_manager, _mask, _manager.lock()->_nextEntity);
 	}
 
 }
