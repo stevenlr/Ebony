@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <cstdint>
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
@@ -14,50 +15,15 @@
 
 #include "ecs/ecs.h"
 
+#define EBONY_OUTPUT_FPS
+
 using namespace std;
 using namespace ebony;
 using namespace ecs;
 
-void testECS()
-{
-	shared_ptr<ecs::EntityManager> m1 = ecs::EntityManager::makeInstance();
-	shared_ptr<ecs::EntityManager> m2 = ecs::EntityManager::makeInstance();
-
-	Entity e1 = m1->create();
-	Entity e2 = m1->create();
-
-	e1.addComponent<float>();
-	e1.addComponent<int>();
-
-	*(e1.getComponent<float>().get()) = 1;
-	*(e1.getComponent<int>().get()) = 1;
-
-	e2.addComponent<float>();
-	e2.addComponent<char>();
-
-	*(e2.getComponent<float>().get()) = 2;
-	*(e2.getComponent<char>().get()) = 'b';
-
-	for (Entity e : m1->getEntitiesWith<float>()) {
-		cout << *(e.getComponent<float>().get()) << endl;
-	}
-
-	cout << endl;
-
-	for (Entity e : m1->getEntitiesWith<float, int>()) {
-		cout << *(e.getComponent<float>().get()) << endl;
-	}
-
-	cout << endl;
-
-	for (Entity e : m1->getEntitiesWith<char>()) {
-		cout << *(e.getComponent<char>().get()) << endl;
-	}
-}
-
 int main(int argc, char *argv[])
 {
-	/*SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_TIMER);
+	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_TIMER);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -87,12 +53,26 @@ int main(int argc, char *argv[])
 	glFrontFace(GL_CCW);
 	glClearColor(0, 0, 0, 1);
 
-	bool running = true;*/
+	bool running = true;
+	SDL_Event event;
+	uint32_t startTime, lastTime = SDL_GetTicks();
+	uint32_t timeAccumulator = 0, frameTime;
+	int framesSimulated;
+	const uint32_t targetFps = 60;
+	const uint32_t msPerFrame = 1000 / targetFps;
+	const float dt = 1.0f / targetFps; 
+	float renderExtrapolationTime;
 
-	testECS();
-	/*
+#ifdef EBONY_OUTPUT_FPS
+	uint32_t fpsCounterTime = 0;
+	int renderedFrames = 0;
+	int simulatedFrames = 0;
+#endif
+	
 	while (running) {
-		SDL_Event event;
+		startTime = SDL_GetTicks();
+		timeAccumulator += startTime - lastTime;
+		framesSimulated = 0;
 
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) {
@@ -100,14 +80,46 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		while (timeAccumulator >= msPerFrame && framesSimulated < 4) {
+			// update dt
+			timeAccumulator -= msPerFrame;
+			++framesSimulated;
+#ifdef EBONY_OUTPUT_FPS
+			++simulatedFrames;
+#endif
+		}
 
+		timeAccumulator = timeAccumulator % msPerFrame;
+		renderExtrapolationTime = timeAccumulator / 1000.0f;
+
+		// draw renderExtrapolationTime
+
+#ifdef EBONY_OUTPUT_FPS
+		++renderedFrames;
+		fpsCounterTime += startTime - lastTime;
+
+		if (fpsCounterTime >= 1000) {
+			cout << renderedFrames << " fps, " << simulatedFrames << " ups" << endl;
+
+			fpsCounterTime -= 1000;
+			renderedFrames = 0;
+			simulatedFrames = 0;
+		}
+#endif
+
+		lastTime = startTime;
 		SDL_GL_SwapWindow(window);
+
+		frameTime = SDL_GetTicks() - startTime;
+		
+		if (frameTime < msPerFrame) {
+			SDL_Delay(msPerFrame - frameTime);
+		}
 	}
 
 	SDL_GL_DeleteContext(glContext);
 	SDL_DestroyWindow(window);
-	SDL_Quit();*/
+	SDL_Quit();
 
 	return 0;
 }
