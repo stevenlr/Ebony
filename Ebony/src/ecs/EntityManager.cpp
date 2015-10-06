@@ -1,4 +1,7 @@
-#include "ecs/ecs.h"
+#include "ecs/EntityManager.h"
+
+#include "ecs/Entity.h"
+#include "ecs/Component.h"
 
 #include <limits>
 #include <stdexcept>

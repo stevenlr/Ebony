@@ -6,12 +6,16 @@
 #include <cassert>
 
 #include "constants.h"
-#include "Entity.h"
-#include "Component.h"
-#include "EntityView.h"
 #include "utils/Pool.h"
 
 namespace ebony { namespace ecs {
+	
+	template<typename T>
+	class Component;
+	
+	class Entity;
+	class EntityView;
+	class EntityView_Iterator;
 
 	class EntityManager : public std::enable_shared_from_this<EntityManager> {
 	public:
@@ -23,7 +27,7 @@ namespace ebony { namespace ecs {
 		Entity create();
 
 	private:
-		friend Entity;
+		friend class Entity;
 
 		EntityManager() = default;
 
@@ -33,135 +37,31 @@ namespace ebony { namespace ecs {
 		bool isEntityValid(const Entity &entity) const;
 
 		template<typename T>
-		inline unsigned int getComponentId()
-		{
-			const static unsigned int id = _nbComponentTypes++;
-
-			assert(id < MAX_COMPONENTS);
-
-			return id;
-		}
+		inline unsigned int getComponentId();
 
 		template<typename T>
-		Pool<T> *createPool()
-		{
-			Pool<T> *pool = new Pool<T>();
-
-			_componentPools[getComponentId<T>()] = reinterpret_cast<IPool *>(pool);
-
-			return pool;
-		}
+		Pool<T> *createPool();
 
 		template<typename T>
-		inline void createComponentMask(ComponentMask &mask)
-		{
-			mask.set(getComponentId<T>());
-		}
+		inline void createComponentMask(ComponentMask &mask);
 
 		template<typename T1, typename T2, typename ... Ts>
-		inline void createComponentMask(ComponentMask &mask)
-		{
-			mask.set(getComponentId<T1>());
-			createComponentMask<T2, Ts ...>(mask);
-		}
+		inline void createComponentMask(ComponentMask &mask);
 
 		template<typename ... Ts>
-		inline ComponentMask createComponentMask()
-		{
-			static ComponentMask mask;
-
-			createComponentMask<Ts ...>(mask);
-
-			return mask;
-		}
+		inline ComponentMask createComponentMask();
 
 		template<typename ... Ts>
-		inline bool hasComponents(const Entity &entity)
-		{
-			if (!isEntityValid(entity)) {
-				return false;
-			}
-
-			static const ComponentMask compMask = createComponentMask<Ts ...>();
-
-			return (_componentMasks[entity._id] & compMask) == compMask;
-		}
+		inline bool hasComponents(const Entity &entity);
 
 		template<typename T>
-		Component<T> addComponent(const Entity &entity)
-		{
-			unsigned int id = getComponentId<T>();
-
-			if (!isEntityValid(entity)) {
-				return Component<T>();
-			}
-
-			if (hasComponents<T>(entity)) {
-				return Component<T>(entity, static_cast<T *>(_components[id][entity._id]));
-			}
-
-			if (_componentPools.size() <= id) {
-				accomodateComponents();
-			}
-
-			Pool<T> *pool = static_cast<Pool<T> *>(_componentPools[id]);
-
-			if (!pool) {
-				pool = createPool<T>();
-			}
-
-			T *componentPtr = static_cast<T *>(pool->allocate());
-
-			_componentMasks[entity._id].set(id);
-			_components[id][entity._id] = componentPtr;
-
-			return Component<T>(entity, componentPtr);
-		}
+		Component<T> addComponent(const Entity &entity);
 
 		template<typename T>
-		Component<T> getComponent(const Entity &entity)
-		{
-			unsigned int id = getComponentId<T>();
-
-			if (!isEntityValid(entity)) {
-				return Component<T>();
-			}
-
-			if (_componentPools.size() <= id) {
-				accomodateComponents();
-			}
-
-			if (!hasComponents<T>(entity)) {
-				return Component<T>();
-			}
-
-			return Component<T>(entity, static_cast<T *>(_components[id][entity._id]));
-		}
+		Component<T> getComponent(const Entity &entity);
 
 		template<typename T>
-		void removeComponent(const Entity &entity)
-		{
-			unsigned int id = getComponentId<T>();
-
-			if (!isEntityValid(entity)) {
-				return;
-			}
-
-			if (_componentPools.size() <= id) {
-				accomodateComponents();
-			}
-
-			if (!hasComponents<T>(entity)) {
-				return;
-			}
-
-			T *componentPtr = static_cast<T *>(_components[id][entity._id]);
-			Pool<T> *pool = static_cast<Pool<T> *>(_componentPools[id]);
-
-			pool->free(componentPtr);
-			_componentMasks[entity._id].reset(id);
-			_components[id][entity._id] = nullptr;
-		}
+		void removeComponent(const Entity &entity);
 
 		unsigned int _nbComponentTypes = 0;
 		EntityId _nextEntity = 0;
@@ -172,17 +72,159 @@ namespace ebony { namespace ecs {
 		std::vector<std::vector<void *>> _components;
 
 	public:
-
 		template<typename ... Ts>
-		EntityView getEntitiesWith()
-		{
-			return EntityView(shared_from_this(), createComponentMask<Ts ...>());
-		}
+		EntityView getEntitiesWith();
 
 	private:
-		friend EntityView;
-		friend EntityView::Iterator;
+		friend class EntityView;
+		friend class EntityView_Iterator;
 	};
+
+}
+}
+
+#include "Entity.h"
+#include "Component.h"
+#include "EntityView.h"
+
+namespace ebony { namespace ecs {
+	
+	template<typename T>
+	inline unsigned int EntityManager::getComponentId()
+	{
+		const static unsigned int id = _nbComponentTypes++;
+
+		assert(id < MAX_COMPONENTS);
+
+		return id;
+	}
+
+	template<typename T>
+	Pool<T> *EntityManager::createPool()
+	{
+		Pool<T> *pool = new Pool<T>();
+
+		_componentPools[getComponentId<T>()] = reinterpret_cast<IPool *>(pool);
+
+		return pool;
+	}
+
+	template<typename T>
+	inline void EntityManager::createComponentMask(ComponentMask &mask)
+	{
+		mask.set(getComponentId<T>());
+	}
+
+	template<typename T1, typename T2, typename ... Ts>
+	inline void EntityManager::createComponentMask(ComponentMask &mask)
+	{
+		mask.set(getComponentId<T1>());
+		createComponentMask<T2, Ts ...>(mask);
+	}
+
+	template<typename ... Ts>
+	inline ComponentMask EntityManager::createComponentMask()
+	{
+		static ComponentMask mask;
+
+		createComponentMask<Ts ...>(mask);
+
+		return mask;
+	}
+
+	template<typename ... Ts>
+	inline bool EntityManager::hasComponents(const Entity &entity)
+	{
+		if (!isEntityValid(entity)) {
+			return false;
+		}
+
+		static const ComponentMask compMask = createComponentMask<Ts ...>();
+
+		return (_componentMasks[entity._id] & compMask) == compMask;
+	}
+
+	template<typename T>
+	Component<T> EntityManager::addComponent(const Entity &entity)
+	{
+		unsigned int id = getComponentId<T>();
+
+		if (!isEntityValid(entity)) {
+			return Component<T>();
+		}
+
+		if (hasComponents<T>(entity)) {
+			return Component<T>(entity, static_cast<T *>(_components[id][entity._id]));
+		}
+
+		if (_componentPools.size() <= id) {
+			accomodateComponents();
+		}
+
+		Pool<T> *pool = static_cast<Pool<T> *>(_componentPools[id]);
+
+		if (!pool) {
+			pool = createPool<T>();
+		}
+
+		T *componentPtr = static_cast<T *>(pool->allocate());
+
+		_componentMasks[entity._id].set(id);
+		_components[id][entity._id] = componentPtr;
+
+		return Component<T>(entity, componentPtr);
+	}
+
+	template<typename T>
+	Component<T> EntityManager::getComponent(const Entity &entity)
+	{
+		unsigned int id = getComponentId<T>();
+
+		if (!isEntityValid(entity)) {
+			return Component<T>();
+		}
+
+		if (_componentPools.size() <= id) {
+			accomodateComponents();
+		}
+
+		if (!hasComponents<T>(entity)) {
+			return Component<T>();
+		}
+
+		return Component<T>(entity, static_cast<T *>(_components[id][entity._id]));
+	}
+
+	template<typename T>
+	void EntityManager::removeComponent(const Entity &entity)
+	{
+		unsigned int id = getComponentId<T>();
+
+		if (!isEntityValid(entity)) {
+			return;
+		}
+
+		if (_componentPools.size() <= id) {
+			accomodateComponents();
+		}
+
+		if (!hasComponents<T>(entity)) {
+			return;
+		}
+
+		T *componentPtr = static_cast<T *>(_components[id][entity._id]);
+		Pool<T> *pool = static_cast<Pool<T> *>(_componentPools[id]);
+
+		pool->free(componentPtr);
+		_componentMasks[entity._id].reset(id);
+		_components[id][entity._id] = nullptr;
+	}
+	
+	template<typename ... Ts>
+	EntityView EntityManager::getEntitiesWith()
+	{
+		return EntityView(shared_from_this(), createComponentMask<Ts ...>());
+	}
 
 }
 }

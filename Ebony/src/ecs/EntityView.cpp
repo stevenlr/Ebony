@@ -6,13 +6,13 @@ using namespace std;
 
 namespace ebony { namespace ecs {
 
-	EntityView::Iterator::Iterator(const EntityView::Iterator &it) :
+	EntityView_Iterator::EntityView_Iterator(const EntityView_Iterator &it) :
 		_mask(it._mask), _current(it._current), _manager(it._manager)
 	{
 		goToFirstValid();
 	}
 
-	EntityView::Iterator &EntityView::Iterator::operator=(const EntityView::Iterator &it)
+	EntityView_Iterator &EntityView_Iterator::operator=(const EntityView_Iterator &it)
 	{
 		_mask = it._mask;
 		_manager = it._manager;
@@ -20,34 +20,34 @@ namespace ebony { namespace ecs {
 		goToFirstValid();
 	}
 
-	EntityView::Iterator::Iterator(weak_ptr<EntityManager> manager,
-										const ComponentMask &mask,
-										EntityId current) :
+	EntityView_Iterator::EntityView_Iterator(weak_ptr<EntityManager> manager,
+											 const ComponentMask &mask,
+											 EntityId current) :
 		_mask(mask), _manager(manager), _current(current)
 	{
 		goToFirstValid();
 	}
 
-	bool EntityView::Iterator::operator==(const EntityView::Iterator &it)
+	bool EntityView_Iterator::operator==(const EntityView_Iterator &it)
 	{
 		return _mask == it._mask
 			&& _current == it._current
 			&& _manager.lock() == it._manager.lock();
 	}
 
-	bool EntityView::Iterator::operator!=(const EntityView::Iterator &it)
+	bool EntityView_Iterator::operator!=(const EntityView_Iterator &it)
 	{
 		return _mask != it._mask
 			|| _current != it._current
 			|| _manager.lock() != it._manager.lock();
 	}
 
-	Entity EntityView::Iterator::operator*() const
+	Entity EntityView_Iterator::operator*() const
 	{
 		return Entity(_manager, _current, _manager.lock()->_entityVersion[_current]);
 	}
 
-	EntityView::Iterator &EntityView::Iterator::operator++()
+	EntityView_Iterator &EntityView_Iterator::operator++()
 	{
 		if (_current < _manager.lock()->_nextEntity) {
 			_current++;
@@ -57,7 +57,7 @@ namespace ebony { namespace ecs {
 		return *this;
 	}
 
-	void EntityView::Iterator::goToFirstValid()
+	void EntityView_Iterator::goToFirstValid()
 	{
 		shared_ptr<EntityManager> manager = _manager.lock();
 

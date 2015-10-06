@@ -1,4 +1,6 @@
-#include "ecs/ecs.h"
+#include "ecs/Entity.h"
+
+#include "ecs/EntityManager.h"
 
 using namespace std;
 
