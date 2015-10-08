@@ -9,18 +9,12 @@
 #include "graphics/TransformPipeline.h"
 #include "graphics/opengl/opengl.h"
 #include "graphics/StaticModel.h"
-#include "utils/io.h"
-#include "utils/perlin.h"
-#include "utils/maths.h"
-#include "utils/Pool.h"
-
-#include "ecs/ecs.h"
+#include "Application.h"
 
 #define EBONY_OUTPUT_FPS
 
 using namespace std;
 using namespace ebony;
-using namespace ecs;
 
 int main(int argc, char *argv[])
 {
@@ -49,9 +43,6 @@ int main(int argc, char *argv[])
 	SDL_GL_SetSwapInterval(1);
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW);
 	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, 1280, 720);
 
@@ -70,6 +61,8 @@ int main(int argc, char *argv[])
 	int renderedFrames = 0;
 	int simulatedFrames = 0;
 #endif
+
+	Application app;
 	
 	while (running) {
 		startTime = SDL_GetTicks();
@@ -79,11 +72,15 @@ int main(int argc, char *argv[])
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) {
 				running = false;
+			} else if (event.type == SDL_KEYDOWN) {
+				if (event.key.keysym.sym == SDLK_ESCAPE) {
+					running = false;
+				}
 			}
 		}
 
 		while (timeAccumulator >= msPerFrame && framesSimulated < 4) {
-			// update dt
+			app.update(dt);
 			timeAccumulator -= msPerFrame;
 			++framesSimulated;
 #ifdef EBONY_OUTPUT_FPS
@@ -94,7 +91,7 @@ int main(int argc, char *argv[])
 		timeAccumulator = timeAccumulator % msPerFrame;
 		renderExtrapolationTime = timeAccumulator / 1000.0f;
 
-		// draw renderExtrapolationTime
+		app.draw(renderExtrapolationTime);
 
 #ifdef EBONY_OUTPUT_FPS
 		++renderedFrames;
