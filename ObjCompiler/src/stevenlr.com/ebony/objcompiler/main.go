@@ -1,11 +1,15 @@
 package main
 
-import(
-	"fmt"
-	"os"
+import (
 	"bufio"
-	"strings"
+	"bytes"
+	"compress/zlib"
+	"encoding/binary"
+	"fmt"
+	"math"
+	"os"
 	"strconv"
+	"strings"
 )
 
 type Vector2f struct {
@@ -22,6 +26,26 @@ type Vertex struct {
 
 type Face struct {
 	vertices [3]Vertex
+}
+
+func minusv3f(a, b Vector3f) (v Vector3f) {
+	v.x = a.x - b.x
+	v.y = a.y - b.y
+	v.z = a.z - b.z
+	return
+}
+
+func minusv2f(a, b Vector2f) (v Vector2f) {
+	v.x = a.x - b.x
+	v.y = a.y - b.y
+	return
+}
+
+func (v *Vector3f) normalize() {
+	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y + v.z*v.z)))
+	v.x /= length
+	v.y /= length
+	v.z /= length
 }
 
 func removeComments(line string) string {
@@ -46,7 +70,7 @@ func parseFloat(str string) (value float32) {
 	v, err := strconv.ParseFloat(str, 32)
 
 	if err != nil {
-		fmt.Errorf("Invalid float")
+		fmt.Fprintf(os.Stderr, "Invalid float")
 		os.Exit(1)
 	}
 
@@ -58,7 +82,7 @@ func parseInt(str string) (value int32) {
 	v, err := strconv.ParseInt(str, 10, 32)
 
 	if err != nil {
-		fmt.Errorf("Invalid int")
+		fmt.Fprintf(os.Stderr, "Invalid int")
 		os.Exit(1)
 	}
 
@@ -66,9 +90,9 @@ func parseInt(str string) (value int32) {
 	return
 }
 
-func (v Vector3f) read(tokens []string) {
+func (v *Vector3f) read(tokens []string) {
 	if len(tokens) < 3 {
-		fmt.Errorf("Invalid 3-vector read")
+		fmt.Fprintf(os.Stderr, "Invalid 3-vector read")
 		os.Exit(1)
 	}
 
@@ -77,9 +101,9 @@ func (v Vector3f) read(tokens []string) {
 	v.z = parseFloat(tokens[2])
 }
 
-func (v Vector2f) read(tokens []string) {
+func (v *Vector2f) read(tokens []string) {
 	if len(tokens) < 2 {
-		fmt.Errorf("Invalid 2-vector read")
+		fmt.Fprintf(os.Stderr, "Invalid 2-vector read")
 		os.Exit(1)
 	}
 
@@ -87,9 +111,9 @@ func (v Vector2f) read(tokens []string) {
 	v.y = parseFloat(tokens[1])
 }
 
-func (f Face) read(tokens []string) {
+func (f *Face) read(tokens []string) {
 	if len(tokens) < 3 {
-		fmt.Errorf("Invalid triangle face")
+		fmt.Fprintf(os.Stderr, "Invalid triangle face")
 		os.Exit(1)
 	}
 
@@ -98,11 +122,11 @@ func (f Face) read(tokens []string) {
 	}
 }
 
-func (v Vertex) read(str string) {
+func (v *Vertex) read(str string) {
 	tokens := strings.Split(str, "/")
 
 	if len(tokens) < 3 {
-		fmt.Errorf("Invalid vertex")
+		fmt.Fprintf(os.Stderr, "Invalid vertex")
 		os.Exit(1)
 	}
 
@@ -194,12 +218,13 @@ func main() {
 	}
 
 	inputFilename := os.Args[1]
-	// outputFilename := os.Args[2]
+	outputFilename := os.Args[2]
 
 	inputFile, err := os.OpenFile(inputFilename, os.O_RDONLY, 0666)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Couldn't open file %s", inputFilename)
+		os.Exit(1)
 	}
 
 	inputFileReader := bufio.NewReader(inputFile)
@@ -214,4 +239,47 @@ func main() {
 	inputFileReader.Reset(inputFile)
 
 	gatherData(inputFileReader, positions, uvs, normals, faces)
+	inputFile.Close()
+
+	var buffer bytes.Buffer
+
+	binary.Write(&buffer, binary.LittleEndian, int32(len(faces)))
+
+	for i := 0; i < len(faces); i++ {
+		face := faces[i]
+
+		p0 := minusv3f(positions[face.vertices[1].pos], positions[face.vertices[0].pos])
+		p1 := minusv3f(positions[face.vertices[2].pos], positions[face.vertices[0].pos])
+		u0 := minusv2f(uvs[face.vertices[1].uv], uvs[face.vertices[0].uv])
+		u1 := minusv2f(uvs[face.vertices[2].uv], uvs[face.vertices[0].uv])
+
+		detinv := 1 / (u0.x*u1.y - u1.x*u0.y)
+
+		var T Vector3f
+
+		T.x = detinv * (p0.x*u1.y - p1.x*u0.y)
+		T.y = detinv * (p0.y*u1.y - p1.y*u0.y)
+		T.z = detinv * (p0.z*u1.y - p1.z*u0.y)
+
+		T.normalize()
+
+		for j := 0; j < 3; j++ {
+			binary.Write(&buffer, binary.LittleEndian, positions[face.vertices[j].pos])
+			binary.Write(&buffer, binary.LittleEndian, normals[face.vertices[j].normal])
+			binary.Write(&buffer, binary.LittleEndian, T)
+			binary.Write(&buffer, binary.LittleEndian, uvs[face.vertices[j].uv])
+		}
+	}
+
+	outputFile, err := os.OpenFile(outputFilename, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
+
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Error when opening file %s for writing", outputFilename)
+		os.Exit(1)
+	}
+
+	zWriter := zlib.NewWriter(outputFile)
+	buffer.WriteTo(zWriter)
+	zWriter.Close()
+	outputFile.Close()
 }
