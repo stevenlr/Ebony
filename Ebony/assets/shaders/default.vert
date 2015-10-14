@@ -15,5 +15,4 @@ void main()
 	gl_Position = uMvp * vec4(iPosition, 1);
 	vNormal = normalize(iNormal);
 	vUV = iUV;
-
 }

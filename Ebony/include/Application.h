@@ -3,6 +3,7 @@
 
 #include "graphics/opengl/opengl.h"
 #include "graphics/TransformPipelineStereo.h"
+#include "graphics/StaticModel.h"
 
 #include <memory>
 
@@ -16,8 +17,7 @@ namespace ebony {
 		void draw(float extrapolationTime);
 			
 	private:
-		std::shared_ptr<gl::VertexArray> _vao;
-		std::shared_ptr<gl::Buffer> _vbo;
+		StaticModel _model;
 		std::shared_ptr<gl::Program> _program;
 		TransformPipelineStereo _pipeline;
 		float _time = 0;

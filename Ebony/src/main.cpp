@@ -16,7 +16,7 @@
 using namespace std;
 using namespace ebony;
 
-int main(int argc, char *argv[])
+int run()
 {
 	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_TIMER);
 
@@ -121,4 +121,13 @@ int main(int argc, char *argv[])
 	SDL_Quit();
 
 	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	try {
+		return run();
+	} catch (exception e) {
+		cerr << e.what() << endl;
+	}
 }
