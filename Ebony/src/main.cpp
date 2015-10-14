@@ -8,6 +8,7 @@
 
 #include "graphics/TransformPipeline.h"
 #include "graphics/opengl/opengl.h"
+#include "graphics/StaticModel.h"
 #include "utils/io.h"
 #include "utils/perlin.h"
 #include "utils/maths.h"
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 	glClearColor(0, 0, 0, 1);
+	glViewport(0, 0, 1280, 720);
 
 	bool running = true;
 	SDL_Event event;
