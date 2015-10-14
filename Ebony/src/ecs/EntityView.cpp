@@ -18,6 +18,8 @@ namespace ebony { namespace ecs {
 		_manager = it._manager;
 		_current = it._current;
 		goToFirstValid();
+
+		return *this;
 	}
 
 	EntityView_Iterator::EntityView_Iterator(weak_ptr<EntityManager> manager,
