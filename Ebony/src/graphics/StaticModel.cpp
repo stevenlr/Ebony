@@ -106,7 +106,7 @@ StaticModel::StaticModel(const string &filename)
 	glBindVertexArray(*_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, *_vbo);
 
-	glBufferData(GL_ARRAY_BUFFER, _nbFaces * 3 * 11 * sizeof(GLfloat), data + 1, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, _nbFaces * 3 * 11 * sizeof(GLfloat), data + 4, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -114,9 +114,9 @@ StaticModel::StaticModel(const string &filename)
 	glEnableVertexAttribArray(3);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), reinterpret_cast<void *>(0));
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), reinterpret_cast<void *>(3));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), reinterpret_cast<void *>(6));
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), reinterpret_cast<void *>(9));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), reinterpret_cast<void *>(6 * sizeof(GLfloat)));
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), reinterpret_cast<void *>(9 * sizeof(GLfloat)));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

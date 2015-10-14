@@ -2,6 +2,7 @@
 
 in vec3 vPosition;
 in vec3 vNormal;
+in vec2 vUV;
 
 uniform sampler2D uTexture;
 
@@ -9,11 +10,7 @@ out vec4 oColor;
 
 void main()
 {
-	vec3 sunDir = normalize(vec3(1, 1, -1));
-	vec3 sunColor = vec3(0.9, 0.85, 0.85);
-	vec3 ambientColor = vec3(0, 0, 0.03);
+	float f = max(dot(vNormal, normalize(vec3(0.2, -1, 1))), 0.1f);
 	
-	float sunContrib = max(dot(vNormal, -sunDir), 0);
-
-	oColor = vec4(ambientColor + sunContrib * sunColor, 1);
+	oColor = vec4(vec3(f), 1);
 }

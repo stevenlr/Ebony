@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <program>
-	<shader type="vertex">default</shader>
-	<shader type="fragment">default</shader>
-	<attribute index="0">iPosition</attribute>
-	<attribute index="1">iNormal</attribute>
-	<fragdata index="0">oColor</fragdata>
+  <shader type="vertex">default</shader>
+  <shader type="fragment">default</shader>
+  <attribute index="0">iPosition</attribute>
+  <attribute index="1">iNormal</attribute>
+  <attribute index="2">iTangent</attribute>
+  <attribute index="3">iUV</attribute>
+  <fragdata index="0">oColor</fragdata>
 </program>
