@@ -6,6 +6,7 @@
 #include "graphics/StaticModel.h"
 
 #include <memory>
+#include <vector>
 
 namespace ebony {
 
@@ -17,11 +18,14 @@ namespace ebony {
 		void draw(float extrapolationTime);
 			
 	private:
-		StaticModel _model;
+		std::vector<StaticModel> _models;
+		std::vector<std::shared_ptr<gl::Texture>> _textures;
 		std::shared_ptr<gl::Program> _program;
+		std::shared_ptr<gl::Sampler> _sampler;
 		TransformPipelineStereo _pipeline;
 		float _time = 0;
 		GLuint _uniformMvp;
+		GLuint _uniformSampler;
 	};
 
 }
