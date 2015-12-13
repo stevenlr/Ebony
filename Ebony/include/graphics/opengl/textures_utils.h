@@ -7,8 +7,8 @@
 
 namespace ebony { namespace gl {
 
-	bool loadTextureFromFile(const Texture &texture, const std::string &filename, std::string &error);
-	void generateMipmaps(const Texture &texture);
+bool loadTextureFromFile(const Texture &texture, const std::string &filename, std::string &error);
+void generateMipmaps(const Texture &texture);
 
 }}
 

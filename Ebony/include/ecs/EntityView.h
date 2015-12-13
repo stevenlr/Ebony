@@ -7,64 +7,63 @@
 
 namespace ebony { namespace ecs {
 	
-	class EntityView;
-	class Entity;
-	class EntityManager;
+class EntityView;
+class Entity;
+class EntityManager;
 	
-	class EntityView_Iterator {
-	public:
-		EntityView_Iterator(const EntityView_Iterator &it);
+class EntityView_Iterator {
+public:
+	EntityView_Iterator(const EntityView_Iterator &it);
 
-		EntityView_Iterator &operator=(const EntityView_Iterator &it);
+	EntityView_Iterator &operator=(const EntityView_Iterator &it);
 
-		bool operator==(const EntityView_Iterator &it);
-		bool operator!=(const EntityView_Iterator &it);
+	bool operator==(const EntityView_Iterator &it);
+	bool operator!=(const EntityView_Iterator &it);
 
-		Entity operator*() const;
-		EntityView_Iterator &operator++();
+	Entity operator*() const;
+	EntityView_Iterator &operator++();
 
-		EntityId _current;
+	EntityId _current;
 
-	private:
-		friend class EntityView;
+private:
+	friend class EntityView;
 
-		EntityView_Iterator() = default;
-		EntityView_Iterator(std::weak_ptr<EntityManager> manager,
-							const ComponentMask &mask,
-							EntityId current = 0);
+	EntityView_Iterator() = default;
+	EntityView_Iterator(std::weak_ptr<EntityManager> manager,
+						const ComponentMask &mask,
+						EntityId current = 0);
 
-		void goToFirstValid();
+	void goToFirstValid();
 
-		ComponentMask _mask;
-		std::weak_ptr<EntityManager> _manager;
-	};
+	ComponentMask _mask;
+	std::weak_ptr<EntityManager> _manager;
+};
 
-	class EntityView {
-	public:
-		typedef EntityView_Iterator Iterator;
+class EntityView {
+public:
+	typedef EntityView_Iterator Iterator;
 		
-		EntityView(const EntityView &view) = default;
+	EntityView(const EntityView &view) = default;
 
-		EntityView &operator=(const EntityView &view) = default;
+	EntityView &operator=(const EntityView &view) = default;
 
-		Iterator begin();
-		Iterator end();
+	Iterator begin();
+	Iterator end();
 
-		const Iterator begin() const;
-		const Iterator end() const;
+	const Iterator begin() const;
+	const Iterator end() const;
 
-	private:
-		friend class EntityManager;
-		friend class EntityView_Iterator;
+private:
+	friend class EntityManager;
+	friend class EntityView_Iterator;
 
-		EntityView() = default;
-		EntityView(std::shared_ptr<EntityManager> manager, const ComponentMask &mask);
+	EntityView() = default;
+	EntityView(std::shared_ptr<EntityManager> manager, const ComponentMask &mask);
 
-		ComponentMask _mask;
-		std::weak_ptr<EntityManager> _manager;
-	};
+	ComponentMask _mask;
+	std::weak_ptr<EntityManager> _manager;
+};
 
-}
-}
+}}
 
 #endif

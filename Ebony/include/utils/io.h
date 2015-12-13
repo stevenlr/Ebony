@@ -5,7 +5,7 @@
 
 namespace ebony {
 
-	bool readFile(const std::string &filename, std::string &output);
+bool readFile(const std::string &filename, std::string &output);
 
 }
 

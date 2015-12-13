@@ -8,19 +8,19 @@
 
 namespace ebony {
 	
-	class StaticModel {
-	public:
-		StaticModel(const std::string &filename);
-		StaticModel(const StaticModel &model) = default;
-		~StaticModel() = default;
+class StaticModel {
+public:
+	StaticModel(const std::string &filename);
+	StaticModel(const StaticModel &model) = default;
+	~StaticModel() = default;
 
-		void draw(int n = 1) const;
+	void draw(int n = 1) const;
 
-	private:
-		std::shared_ptr<gl::VertexArray> _vao;
-		std::shared_ptr<gl::Buffer> _vbo;
-		int _nbFaces;
-	};
+private:
+	std::shared_ptr<gl::VertexArray> _vao;
+	std::shared_ptr<gl::Buffer> _vbo;
+	int _nbFaces;
+};
 
 }
 
