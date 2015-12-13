@@ -43,9 +43,11 @@ void EntityManager::destroy(Entity &entity)
 		return;
 	}
 
-	++_entityVersion[entity._id];
+	if (++_entityVersion[entity._id] != 0) {
+        _freeList.push_back(entity._id);
+    }
+
 	_componentMasks[entity._id].reset();
-	_freeList.push_back(entity._id);
 	entity._manager.reset();
 }
 
