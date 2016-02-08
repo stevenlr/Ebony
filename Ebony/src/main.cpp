@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include <SDL2/SDL.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <stb_image.h>
 
 #include "graphics/TransformPipeline.h"
@@ -40,8 +40,7 @@ int main(int argc, char *argv[])
 	SDL_Window *window = SDL_CreateWindow("Ebony", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL);
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
+	if (!gladLoadGL()) {
 		return 1;
 	}
 

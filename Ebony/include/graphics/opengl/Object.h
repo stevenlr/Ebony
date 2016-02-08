@@ -1,7 +1,7 @@
 #ifndef EBONY_GRAPHICS_OPENGL_OBJECT_H_
 #define EBONY_GRAPHICS_OPENGL_OBJECT_H_
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "enums.h"
 
