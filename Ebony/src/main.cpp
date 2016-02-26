@@ -4,23 +4,13 @@
 
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
-#include <stb_image.h>
 
-#include "graphics/TransformPipeline.h"
-#include "graphics/opengl/opengl.h"
-#include "graphics/StaticModel.h"
-#include "utils/io.h"
-#include "utils/perlin.h"
-#include "utils/maths.h"
-#include "utils/Pool.h"
-
-#include "ecs/ecs.h"
+#include "input/InputHandler.h"
 
 #define EBONY_OUTPUT_FPS
 
 using namespace std;
 using namespace ebony;
-using namespace ecs;
 
 int main(int argc, char *argv[])
 {
@@ -54,8 +44,10 @@ int main(int argc, char *argv[])
 	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, 1280, 720);
 
+	InputHandler::init();
+	InputHandler *inputHandler = InputHandler::getInstance();
+
 	bool running = true;
-	SDL_Event event;
 	uint32_t startTime, lastTime = SDL_GetTicks();
 	uint32_t timeAccumulator = 0, frameTime;
 	int framesSimulated;
@@ -75,10 +67,10 @@ int main(int argc, char *argv[])
 		timeAccumulator += startTime - lastTime;
 		framesSimulated = 0;
 
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) {
-				running = false;
-			}
+		inputHandler->update();
+
+		if (inputHandler->isQuitRequested()) {
+			running = false;
 		}
 
 		while (timeAccumulator >= msPerFrame && framesSimulated < 4) {
