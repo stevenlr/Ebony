@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, 1280, 720);
 
-	InputHandler::init();
-	InputHandler *inputHandler = InputHandler::getInstance();
+	input::InputHandler::init();
+	input::InputHandler *inputHandler = input::InputHandler::getInstance();
 
 	bool running = true;
 	uint32_t startTime, lastTime = SDL_GetTicks();
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
 		inputHandler->update();
 
-		if (inputHandler->isQuitRequested()) {
+		if (inputHandler->isQuitRequested() || inputHandler->wasKeyReleased(input::KeyboardKeys::Quit)) {
 			running = false;
 		}
 
