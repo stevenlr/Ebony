@@ -36,8 +36,24 @@ public:
 		}
 
 		_mvpUniform = glGetUniformLocation(*_program, "uMvp");
+		_cubemapUniform = glGetUniformLocation(*_program, "uCubemap");
 
 		_model = new StaticModel("assets/models/suzanne.cobj");
+		_cube = new StaticModel("assets/models/cube.cobj");
+
+		_cubemap = make_shared<gl::Texture>();
+
+		if (!gl::loadCubemapFromDirectory(*_cubemap, "assets/textures/cubemap_gb", error)) {
+			cerr << error << endl;
+			throw runtime_error("Couldn't load cubemap");
+		}
+
+		_sampler = make_shared<gl::Sampler>();
+		glSamplerParameteri(*_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glSamplerParameteri(*_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glSamplerParameteri(*_sampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glSamplerParameteri(*_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glSamplerParameteri(*_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 		_transform.perspective(70.0f, 1280, 720, 0.01f, 1000.0f);
 	}
@@ -56,17 +72,25 @@ public:
 	void draw(float dt)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, *_cubemap);
+		glBindSampler(0, *_sampler);
+
 		glUseProgram(*_program);
 		_camera.setTransformPipeline(_transform);
 		glUniformMatrix4fv(_mvpUniform, 1, false, glm::value_ptr(_transform.getMvp()));
-		_model->draw();
+		glUniform1i(_cubemapUniform, 0);
+		_cube->draw();
 	}
 
 private:
 	shared_ptr<gl::Program> _program;
+	shared_ptr<gl::Texture> _cubemap;
+	shared_ptr<gl::Sampler> _sampler;
 	TransformPipeline _transform;
-	StaticModel *_model;
-	GLuint _mvpUniform;
+	StaticModel *_model, *_cube;
+	GLuint _mvpUniform, _cubemapUniform;
 	FPSCamera _camera;
 	float _time = 0;
 };
@@ -100,7 +124,7 @@ int main(int argc, char *argv[])
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	glCullFace(GL_FRONT);
 	glFrontFace(GL_CCW);
 	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, 1280, 720);
