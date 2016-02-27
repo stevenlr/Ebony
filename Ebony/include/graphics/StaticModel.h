@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include "opengl/Object.h"
+#include "opengl/opengl.h"
 
 namespace ebony {
 	

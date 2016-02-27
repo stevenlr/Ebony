@@ -4,7 +4,7 @@ in vec3 vPosition;
 in vec3 vNormal;
 in vec2 vUV;
 
-uniform sampler2D uTexture;
+//uniform sampler2D uTexture;
 
 out vec4 oColor;
 

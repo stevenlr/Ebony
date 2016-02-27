@@ -1,7 +1,6 @@
 #include "input/InputHandler.h"
 
 #include <stdexcept>
-#include <iostream>
 
 #include <SDL2/SDL.h>
 

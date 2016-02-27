@@ -1,16 +1,75 @@
 #include <iostream>
 #include <memory>
 #include <cstdint>
+#include <string>
 
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
 
 #include "input/InputHandler.h"
+#include "graphics/opengl/opengl.h"
+#include "graphics/StaticModel.h"
+#include "graphics/TransformPipeline.h"
+#include "utils/io.h"
+#include "FPSCamera.h"
 
 #define EBONY_OUTPUT_FPS
 
 using namespace std;
 using namespace ebony;
+
+class Application {
+public:
+	Application()
+	{
+		string xmlProgram, error;
+
+		if (!readFile("assets/programs/default.xml", xmlProgram)) {
+			throw runtime_error("Cannot read program file");
+		}
+
+		_program = make_shared<gl::Program>();
+
+		if (!gl::linkProgramFromXml(*_program, xmlProgram, error)) {
+			cerr << error << endl;
+			throw runtime_error("Couldn't link program");
+		}
+
+		_mvpUniform = glGetUniformLocation(*_program, "uMvp");
+
+		_model = new StaticModel("assets/models/suzanne.cobj");
+
+		_transform.perspective(70.0f, 1280, 720, 0.01f, 1000.0f);
+	}
+
+	~Application()
+	{
+		delete _model;
+	}
+
+	void update(float dt)
+	{
+		_time += dt;
+		_camera.update(dt);
+	}
+
+	void draw(float dt)
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glUseProgram(*_program);
+		_camera.setTransformPipeline(_transform);
+		glUniformMatrix4fv(_mvpUniform, 1, false, glm::value_ptr(_transform.getMvp()));
+		_model->draw();
+	}
+
+private:
+	shared_ptr<gl::Program> _program;
+	TransformPipeline _transform;
+	StaticModel *_model;
+	GLuint _mvpUniform;
+	FPSCamera _camera;
+	float _time = 0;
+};
 
 int main(int argc, char *argv[])
 {
@@ -37,6 +96,8 @@ int main(int argc, char *argv[])
 	SDL_GL_MakeCurrent(window, glContext);
 	SDL_GL_SetSwapInterval(1);
 
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -61,6 +122,8 @@ int main(int argc, char *argv[])
 	int renderedFrames = 0;
 	int simulatedFrames = 0;
 #endif
+
+	Application app;
 	
 	while (running) {
 		startTime = SDL_GetTicks();
@@ -69,12 +132,13 @@ int main(int argc, char *argv[])
 
 		inputHandler->update();
 
-		if (inputHandler->isQuitRequested() || inputHandler->wasKeyReleased(input::KeyboardKeys::Quit)) {
+		if (inputHandler->isQuitRequested() || inputHandler->wasKeyPressed(input::KeyboardKeys::Quit)) {
 			running = false;
 		}
 
 		while (timeAccumulator >= msPerFrame && framesSimulated < 4) {
 			// update dt
+			app.update(dt);
 			timeAccumulator -= msPerFrame;
 			++framesSimulated;
 #ifdef EBONY_OUTPUT_FPS
@@ -86,6 +150,7 @@ int main(int argc, char *argv[])
 		renderExtrapolationTime = timeAccumulator / 1000.0f;
 
 		// draw renderExtrapolationTime
+		app.draw(renderExtrapolationTime);
 
 #ifdef EBONY_OUTPUT_FPS
 		++renderedFrames;
