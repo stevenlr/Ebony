@@ -41,18 +41,14 @@ class InputHandler {
 
 		inline void press()
 		{
-			if (!released) {
-				pressed = true;
-				isDown = true;
-			}
+			pressed = true;
+			isDown = true;
 		}
 
 		inline void release()
 		{
-			if (!pressed) {
-				released = true;
-				isDown = false;
-			}
+			released = true;
+			isDown = false;
 		}
 	};
 
