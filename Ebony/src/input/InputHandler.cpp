@@ -36,10 +36,7 @@ void InputHandler::init()
 
 InputHandler *InputHandler::getInstance()
 {
-	if (!_instance) {
-		throw runtime_error("Trying to access input handler before initialization");
-	}
-
+	ASSERT(_instance, "Trying to access input handler before initialization");
 	return _instance;
 }
 

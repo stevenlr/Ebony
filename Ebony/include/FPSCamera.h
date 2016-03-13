@@ -12,7 +12,7 @@ public:
 	FPSCamera();
 
 	void update(float dt);
-	void setTransformPipeline(TransformPipeline &transform) const;
+	void setTransformPipeline(TransformPipeline *transform) const;
 
 private:
 	glm::vec3 _position;

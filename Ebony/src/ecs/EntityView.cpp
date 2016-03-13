@@ -1,6 +1,7 @@
 #include "ecs/EntityView.h"
 
 #include "ecs/EntityManager.h"
+#include "utils/assert.h"
 
 using namespace std;
 
@@ -84,10 +85,7 @@ EntityView::Iterator EntityView::begin()
 
 EntityView::Iterator EntityView::end()
 {
-	if (!_manager.lock()) {
-		throw runtime_error("Reference to manager expired");
-	}
-
+	ASSERT(_manager.lock(), "Reference to manager expired");
 	return Iterator(_manager, _mask, _manager.lock()->_nextEntity);
 }
 
@@ -98,10 +96,7 @@ const EntityView::Iterator EntityView::begin() const
 
 const EntityView::Iterator EntityView::end() const
 {
-	if (!_manager.lock()) {
-		throw runtime_error("Reference to manager expired");
-	}
-
+	ASSERT(_manager.lock(), "Reference to manager expired");
 	return Iterator(_manager, _mask, _manager.lock()->_nextEntity);
 }
 

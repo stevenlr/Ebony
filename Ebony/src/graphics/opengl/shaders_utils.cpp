@@ -15,7 +15,7 @@ using namespace tinyxml2;
 
 namespace ebony { namespace gl {
 
-bool compileShaderFromSource(const Shader &shader, const std::string &source, std::string &error)
+bool compileShaderFromSource(const Shader &shader, const std::string &source, std::string *error)
 {
 	const GLchar *sourceString = &*source.cbegin();
 	GLint size = source.size();
@@ -27,11 +27,13 @@ bool compileShaderFromSource(const Shader &shader, const std::string &source, st
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 
 	if (status != GL_TRUE) {
-		GLint logLength;
+		if (error) {
+			GLint logLength;
 
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-		error.resize(logLength);
-		glGetShaderInfoLog(shader, logLength, nullptr, &*error.begin());
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+			error->resize(logLength);
+			glGetShaderInfoLog(shader, logLength, nullptr, &*error->begin());
+		}
 
 		return false;
 	}
@@ -39,7 +41,7 @@ bool compileShaderFromSource(const Shader &shader, const std::string &source, st
 	return true;
 }
 
-bool linkProgramFromXml(const Program &program, const std::string &xmlSource, std::string &error)
+bool linkProgramFromXml(const Program &program, const std::string &xmlSource, std::string *error)
 {
 	const char *sourceString = &*xmlSource.cbegin();
 	size_t size = xmlSource.size();
@@ -84,21 +86,25 @@ bool linkProgramFromXml(const Program &program, const std::string &xmlSource, st
 
 		subSource.clear();
 
-		if (!readFile(shaderPath, subSource)) {
-			stringstream sstr;
+		if (!readFile(shaderPath, &subSource)) {
+			if (error) {
+				stringstream sstr;
 
-			sstr << "Error reading file " << shaderPath << endl;
-			error = sstr.str();
+				sstr << "Error reading file " << shaderPath << endl;
+				*error = sstr.str();
+			}
 
 			return false;
 		}
 			
-		if (!compileShaderFromSource(*shader, subSource, subError)) {
-			stringstream sstr;
+		if (!compileShaderFromSource(*shader, subSource, &subError)) {
+			if (error) {
+				stringstream sstr;
 
-			sstr << "Error compiling " << typeString << " shader " << element->GetText() << ": " << endl;
-			sstr << subError << endl;
-			error = sstr.str();
+				sstr << "Error compiling " << typeString << " shader " << element->GetText() << ": " << endl;
+				sstr << subError << endl;
+				*error = sstr.str();
+			}
 
 			return false;
 		}
@@ -132,11 +138,13 @@ bool linkProgramFromXml(const Program &program, const std::string &xmlSource, st
 	shaders.clear();
 
 	if (status != GL_TRUE) {
-		GLint logLength;
+		if (error) {
+			GLint logLength;
 
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-		error.resize(logLength);
-		glGetProgramInfoLog(program, logLength, nullptr, &*error.begin());
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+			error->resize(logLength);
+			glGetProgramInfoLog(program, logLength, nullptr, &*error->begin());
+		}
 
 		return false;
 	}

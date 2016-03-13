@@ -5,6 +5,7 @@
 #include <zlib.h>
 
 #include "utils/io.h"
+#include "utils/assert.h"
 
 #define CHUNK 16384
 
@@ -36,7 +37,7 @@ int inf(ifstream &source, uint8_t **dest)
 
 	do {
 		source.read(reinterpret_cast<char *>(in), CHUNK);
-		strm.avail_in = source.gcount();
+		strm.avail_in = static_cast<uInt>(source.gcount());
 
 		if (source.bad()) {
 			inflateEnd(&strm);
@@ -96,16 +97,10 @@ StaticModel::StaticModel(const string &filename)
 	uint8_t *data;
 
 	source.open(filename, ios_base::in | ios_base::binary);
-
-	if (!source.is_open()) {
-		throw runtime_error("Couldn't open model file");
-	}
+	ASSERT(source.is_open(), "Opening model file");
 
 	_nbFaces = inf(source, &data);
-
-	if (_nbFaces < 0) {
-		throw runtime_error("Error when reading model");
-	}
+	ASSERT(_nbFaces >= 0, "Reading model file");
 
 	glBindVertexArray(*_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, *_vbo);

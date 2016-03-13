@@ -24,13 +24,13 @@ public:
 	{
 		string xmlProgram, error;
 
-		if (!readFile("assets/programs/default.xml", xmlProgram)) {
+		if (!readFile("assets/programs/default.xml", &xmlProgram)) {
 			throw runtime_error("Cannot read program file");
 		}
 
 		_program = make_shared<gl::Program>();
 
-		if (!gl::linkProgramFromXml(*_program, xmlProgram, error)) {
+		if (!gl::linkProgramFromXml(*_program, xmlProgram, &error)) {
 			cerr << error << endl;
 			throw runtime_error("Couldn't link program");
 		}
@@ -43,7 +43,7 @@ public:
 
 		_cubemap = make_shared<gl::Texture>();
 
-		if (!gl::loadCubemapFromDirectory(*_cubemap, "assets/textures/cubemap_gb", error)) {
+		if (!gl::loadCubemapFromDirectory(*_cubemap, "assets/textures/cubemap_gb", &error)) {
 			cerr << error << endl;
 			throw runtime_error("Couldn't load cubemap");
 		}
@@ -78,7 +78,7 @@ public:
 		glBindSampler(0, *_sampler);
 
 		glUseProgram(*_program);
-		_camera.setTransformPipeline(_transform);
+		_camera.setTransformPipeline(&_transform);
 		glUniformMatrix4fv(_mvpUniform, 1, false, glm::value_ptr(_transform.getMvp()));
 		glUniform1i(_cubemapUniform, 0);
 		_cube->draw();

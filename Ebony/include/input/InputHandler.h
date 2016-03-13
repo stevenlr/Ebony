@@ -5,6 +5,8 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_keycode.h>
 
+#include "utils/assert.h"
+
 namespace ebony { namespace input {
 
 namespace MouseButtons {
@@ -78,6 +80,8 @@ private:
 	inline static bool isMouseButtonValid(const Uint8 sdlButton, MouseButtons::Aliases *button)
 	{
 		static const Uint8 mouseButtonMask = SDL_BUTTON_LMASK | SDL_BUTTON_RMASK | SDL_BUTTON_MMASK;
+
+		ASSERT(button, "");
 
 		if (!(sdlButton & mouseButtonMask)) {
 			return false;

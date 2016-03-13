@@ -7,8 +7,8 @@
 
 namespace ebony { namespace gl {
 
-bool compileShaderFromSource(const Shader &shader, const std::string &source, std::string &error);
-bool linkProgramFromXml(const Program &program, const std::string &xmlSource, std::string &error);
+bool compileShaderFromSource(const Shader &shader, const std::string &source, std::string *error);
+bool linkProgramFromXml(const Program &program, const std::string &xmlSource, std::string *error);
 
 }}
 

@@ -1,8 +1,8 @@
 #include "FPSCamera.h"
 
 #include "input/InputHandler.h"
-
-#define PI 3.14159265359f
+#include "utils/assert.h"
+#include "utils/maths.h"
 
 using namespace glm;
 using namespace std;
@@ -24,7 +24,7 @@ void FPSCamera::update(float dt)
 
 	_hangle -= mouseMoveX * mouseSpeed;
 	_vangle -= mouseMoveY * mouseSpeed;
-	_vangle = clamp(_vangle, -PI / 2 + 0.01f, PI / 2 - 0.01f);
+	_vangle = clamp(_vangle, -PI_F / 2 + 0.01f, PI_F / 2 - 0.01f);
 
 	vec3 forward(cosf(_hangle), sinf(_hangle), 0);
 	vec3 right(sinf(_hangle), -cosf(_hangle), 0);
@@ -59,12 +59,14 @@ void FPSCamera::update(float dt)
 	_position += (changeForward * forward + changeRight * right + changeUp * vec3(0, 0, 1)) * dt * moveSpeed;
 }
 
-void FPSCamera::setTransformPipeline(TransformPipeline &transform) const
+void FPSCamera::setTransformPipeline(TransformPipeline *transform) const
 {
 	vec3 direction(cosf(_hangle) * cosf(_vangle), sinf(_hangle) * cosf(_vangle), sinf(_vangle));
 	vec3 target(_position + direction);
 
-	transform.lookat(_position, target, vec3(0, 0, 1));
+	ASSERT(transform, "null transform");
+
+	transform->lookat(_position, target, vec3(0, 0, 1));
 }
 
 }

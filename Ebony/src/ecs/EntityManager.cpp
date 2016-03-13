@@ -6,6 +6,8 @@
 #include <limits>
 #include <stdexcept>
 
+#include "utils/assert.h"
+
 using namespace std;
 
 namespace ebony { namespace ecs {
@@ -21,9 +23,7 @@ Entity EntityManager::create()
 	EntityVersion version;
 
 	if (_freeList.empty()) {
-		if (_nextEntity > numeric_limits<EntityId>::max()) {
-			throw runtime_error("Entity id out of bounds");
-		}
+		ASSERT(_nextEntity <= numeric_limits<EntityId>::max(), "Entity id out of bounds");
 
 		growCapacity();
 		id = _nextEntity++;

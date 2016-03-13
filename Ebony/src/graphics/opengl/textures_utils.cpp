@@ -6,60 +6,69 @@
 
 #include <stb_image.h>
 
+#include "utils/assert.h"
 #include "graphics/opengl/opengl.h"
 
 using namespace std;
 
 namespace ebony { namespace gl {
 
-bool getImageData(const string &filename, string &error,
-				  uint8_t *&data,
-				  int &width, int &height, int &components,
-				  GLenum &internalFormat, GLenum &format)
+bool getImageData(const string &filename, string *error,
+				  uint8_t **data,
+				  int *width, int *height, int *components,
+				  GLenum *internalFormat, GLenum *format)
 {
-	data = stbi_load(filename.c_str(), &width, &height, &components, 0);
+	ASSERT(data && width && height && components && internalFormat && format, "");
+
+	*data = stbi_load(filename.c_str(), width, height, components, 0);
 
 	if (!data) {
-		error = "Couldn't open texture ";
-		error += filename;
+		if (error) {
+			*error = "Couldn't open texture ";
+			*error += filename;
+		}
+
 		return false;
 	}
 
-	if (width <= 0 || height <= 0 || components <= 0 || components > 4) {
-		error = "Invalid texture ";
-		error += filename;
+	if (*width <= 0 || *height <= 0 || *components <= 0 || *components > 4) {
+		if (error) {
+			*error = "Invalid texture ";
+			*error += filename;
+		}
+
 		return false;
 	}
 
-	switch (components) {
+	switch (*components) {
 		case 1:
-			internalFormat = GL_R8;
-			format = GL_RED;
+			*internalFormat = GL_R8;
+			*format = GL_RED;
 			break;
 		case 2:
-			internalFormat = GL_RG8;
-			format = GL_RG;
+			*internalFormat = GL_RG8;
+			*format = GL_RG;
 			break;
 		case 3:
-			internalFormat = GL_RGB8;
-			format = GL_RGB;
+			*internalFormat = GL_RGB8;
+			*format = GL_RGB;
 			break;
 		case 4:
-			internalFormat = GL_RGBA8;
-			format = GL_RGBA;
+			*internalFormat = GL_RGBA8;
+			*format = GL_RGBA;
 			break;
 	}
 
 	return true;
 }
 
-bool loadTextureFromFile(const Texture &texture, const string &filename, string &error)
+bool loadTextureFromFile(const Texture &texture, const string &filename, string *error)
 {
 	int width, height, components;
 	GLenum internalFormat, format;
 	uint8_t *data;
 
-	if (!getImageData(filename, error, data, width, height, components, internalFormat, format)) {
+	if (!getImageData(filename, error, &data, &width, &height, &components, &internalFormat, &format)) {
 		return false;
 	}
 
@@ -72,7 +81,7 @@ bool loadTextureFromFile(const Texture &texture, const string &filename, string 
 	return true;
 }
 
-bool loadCubemapFromDirectory(const Texture &texture, const string &dirname, string &error)
+bool loadCubemapFromDirectory(const Texture &texture, const string &dirname, string *error)
 {
 	static const string sidesStr[6] = {
 		string("posx.png"), string("posy.png"), string("posz.png"),
@@ -94,7 +103,7 @@ bool loadCubemapFromDirectory(const Texture &texture, const string &dirname, str
 	for (int i = 0; i < 6; ++i) {
 		string filename = dirname + "/" + sidesStr[i];
 
-		if (!getImageData(filename, error, data, width, height, components, internalFormat, format)) {
+		if (!getImageData(filename, error, &data, &width, &height, &components, &internalFormat, &format)) {
 			return false;
 		}
 
