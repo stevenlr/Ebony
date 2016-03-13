@@ -24,21 +24,37 @@ public:
 	{
 		string xmlProgram, error;
 
-		if (!readFile("assets/programs/default.xml", xmlProgram)) {
+		if (!readFile("assets/programs/cubemap.xml", xmlProgram)) {
 			throw runtime_error("Cannot read program file");
 		}
 
-		_program = make_shared<gl::Program>();
+		_programCubemap = make_shared<gl::Program>();
+		_programGlass = make_shared<gl::Program>();
 
-		if (!gl::linkProgramFromXml(*_program, xmlProgram, error)) {
+		if (!gl::linkProgramFromXml(*_programCubemap, xmlProgram, error)) {
 			cerr << error << endl;
 			throw runtime_error("Couldn't link program");
 		}
 
-		_mvpUniform = glGetUniformLocation(*_program, "uMvp");
-		_cubemapUniform = glGetUniformLocation(*_program, "uCubemap");
+		_mvpUniformCm = glGetUniformLocation(*_programCubemap, "uMvp");
+		_cubemapUniformCm = glGetUniformLocation(*_programCubemap, "uCubemap");
 
-		_model = new StaticModel("assets/models/suzanne.cobj");
+		glUseProgram(*_programCubemap);
+		glUniform1i(_cubemapUniformCm, 0);
+
+		if (!readFile("assets/programs/default.xml", xmlProgram)) {
+			throw runtime_error("Cannot read program file");
+		}
+
+		if (!gl::linkProgramFromXml(*_programGlass, xmlProgram, error)) {
+			cerr << error << endl;
+			throw runtime_error("Couldn't link program");
+		}
+
+		_mvpUniformG = glGetUniformLocation(*_programGlass, "uMvp");
+		_textureUniformG = glGetUniformLocation(*_programGlass, "uTexture");
+
+		_plane = new StaticModel("assets/models/plane.cobj");
 		_cube = new StaticModel("assets/models/cube.cobj");
 
 		_cubemap = make_shared<gl::Texture>();
@@ -46,6 +62,13 @@ public:
 		if (!gl::loadCubemapFromDirectory(*_cubemap, "assets/textures/cubemap_gb", error)) {
 			cerr << error << endl;
 			throw runtime_error("Couldn't load cubemap");
+		}
+
+		_glassTexture = make_shared<gl::Texture>();
+
+		if (!gl::loadTextureFromFile(*_glassTexture, "assets/textures/glass.png", error)) {
+			cerr << error << endl;
+			throw runtime_error("Couldn't load glass texture");
 		}
 
 		_sampler = make_shared<gl::Sampler>();
@@ -56,11 +79,16 @@ public:
 		glSamplerParameteri(*_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 		_transform.perspective(70.0f, 1280, 720, 0.01f, 1000.0f);
+
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
+		glDisable(GL_CULL_FACE);
 	}
 
 	~Application()
 	{
-		delete _model;
+		delete _plane;
+		delete _cube;
 	}
 
 	void update(float dt)
@@ -71,26 +99,41 @@ public:
 
 	void draw(float dt)
 	{
+		_camera.setTransformPipeline(_transform);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, *_cubemap);
 		glBindSampler(0, *_sampler);
 
-		glUseProgram(*_program);
-		_camera.setTransformPipeline(_transform);
-		glUniformMatrix4fv(_mvpUniform, 1, false, glm::value_ptr(_transform.getMvp()));
-		glUniform1i(_cubemapUniform, 0);
+		glDepthFunc(GL_LEQUAL);
+		glUseProgram(*_programCubemap);
+		glUniformMatrix4fv(_mvpUniformCm, 1, false, glm::value_ptr(_transform.getMvp()));
 		_cube->draw();
+		glDepthFunc(GL_LESS);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, *_glassTexture);
+		glBindSampler(0, *_sampler);
+
+		glEnable(GL_BLEND);
+		glUseProgram(*_programGlass);
+		glUniformMatrix4fv(_mvpUniformG, 1, false, glm::value_ptr(_transform.getMvp()));
+		_plane->draw();
+		glDisable(GL_BLEND);
 	}
 
 private:
-	shared_ptr<gl::Program> _program;
+	shared_ptr<gl::Program> _programCubemap;
+	shared_ptr<gl::Program> _programGlass;
 	shared_ptr<gl::Texture> _cubemap;
+	shared_ptr<gl::Texture> _glassTexture;
 	shared_ptr<gl::Sampler> _sampler;
 	TransformPipeline _transform;
-	StaticModel *_model, *_cube;
-	GLuint _mvpUniform, _cubemapUniform;
+	StaticModel *_plane, *_cube;
+	GLuint _mvpUniformCm, _cubemapUniformCm;
+	GLuint _mvpUniformG, _textureUniformG;
 	FPSCamera _camera;
 	float _time = 0;
 };
@@ -124,7 +167,7 @@ int main(int argc, char *argv[])
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
+	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, 1280, 720);

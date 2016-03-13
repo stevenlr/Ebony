@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<program>
+  <shader type="vertex">cubemap</shader>
+  <shader type="fragment">cubemap</shader>
+  <attribute index="0">iPosition</attribute>
+  <fragdata index="0">oColor</fragdata>
+</program>
