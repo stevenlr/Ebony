@@ -12,6 +12,8 @@ using namespace std;
 
 namespace ebony { namespace ecs {
 
+unsigned int EntityManager::_nbComponentTypes = 0;
+
 shared_ptr<EntityManager> EntityManager::makeInstance()
 {
 	return shared_ptr<EntityManager>(new EntityManager());

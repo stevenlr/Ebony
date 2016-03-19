@@ -4,20 +4,28 @@ namespace ebony { namespace tests {
 
 using namespace ecs;
 
-ECSTest::ECSTest()
+ECSEntityTest::ECSEntityTest()
 {
 	manager1 = EntityManager::makeInstance();
 	manager2 = EntityManager::makeInstance();
 }
 
-TEST_F(ECSTest, EntityEquality)
+TEST_F(ECSEntityTest, Equality)
 {
 	ecs::Entity e1 = manager1->create();
 
 	ASSERT_EQ(e1, e1);
 }
 
-TEST_F(ECSTest, EntityInequalitySameManager)
+TEST_F(ECSEntityTest, Copy)
+{
+	ecs::Entity e1 = manager1->create();
+	ecs::Entity e2 = e1;
+
+	ASSERT_EQ(e1, e2);
+}
+
+TEST_F(ECSEntityTest, InequalitySameManager)
 {
 	ecs::Entity e1 = manager1->create();
 	ecs::Entity e2 = manager1->create();
@@ -25,12 +33,155 @@ TEST_F(ECSTest, EntityInequalitySameManager)
 	ASSERT_NE(e1, e2);
 }
 
-TEST_F(ECSTest, EntityInequalityDifferentManager)
+TEST_F(ECSEntityTest, InequalityDifferentManager)
 {
 	ecs::Entity e1 = manager1->create();
 	ecs::Entity e2 = manager2->create();
 
 	ASSERT_NE(e1, e2);
+}
+
+TEST_F(ECSEntityTest, Valid)
+{
+	ecs::Entity e = manager1->create();
+
+	ASSERT_TRUE(e.isValid());
+	ASSERT_TRUE(e);
+}
+
+TEST_F(ECSEntityTest, InvalidAfterDestroy)
+{
+	ecs::Entity e = manager1->create();
+	ecs::Entity eCopy = e;
+	e.destroy();
+	ASSERT_FALSE(e.isValid());
+	ASSERT_FALSE(e);
+	ASSERT_FALSE(eCopy.isValid());
+	ASSERT_FALSE(eCopy);
+}
+
+TEST_F(ECSEntityTest, InvalidAfterManagerDestruction)
+{
+	shared_ptr<ecs::EntityManager> manager = ecs::EntityManager::makeInstance();
+	ecs::Entity e = manager->create();
+
+	manager.reset();
+	ASSERT_FALSE(e.isValid());
+}
+
+ECSComponentTest::ECSComponentTest()
+{
+	manager = EntityManager::makeInstance();
+	e1 = manager->create();
+	e2 = manager->create();
+}
+
+TEST_F(ECSComponentTest, AddValid)
+{
+	ASSERT_TRUE(e1.addComponent<ComponentA>());
+}
+
+TEST_F(ECSComponentTest, Equality)
+{
+	ecs::Component<ComponentA> c = e1.addComponent<ComponentA>();
+
+	ASSERT_EQ(c, c);
+}
+
+TEST_F(ECSComponentTest, Copy)
+{
+	ecs::Component<ComponentA> c = e1.addComponent<ComponentA>();
+	ecs::Component<ComponentA> cCopy = c;
+
+	ASSERT_EQ(c, cCopy);
+}
+
+TEST_F(ECSComponentTest, InequalityDifferentType)
+{
+	ecs::Component<ComponentA> ca = e1.addComponent<ComponentA>();
+	ecs::Component<ComponentB> cb = e1.addComponent<ComponentB>();
+
+	ASSERT_NE(ca, cb);
+}
+
+TEST_F(ECSComponentTest, InequalityDifferentEntity)
+{
+	ecs::Component<ComponentA> c1 = e1.addComponent<ComponentA>();
+	ecs::Component<ComponentA> c2 = e2.addComponent<ComponentA>();
+
+	ASSERT_NE(c1, c2);
+}
+
+TEST_F(ECSComponentTest, AddExistingReturnsCurrent)
+{
+	ecs::Component<ComponentA> c = e1.addComponent<ComponentA>();
+
+	ASSERT_EQ(e1.addComponent<ComponentA>(), c);
+}
+
+TEST_F(ECSComponentTest, GetExisting)
+{
+	ecs::Component<ComponentA> a = e1.addComponent<ComponentA>();
+	ecs::Component<ComponentB> b = e1.addComponent<ComponentB>();
+
+	b->data = 2;
+
+	ASSERT_TRUE(e1.getComponent<ComponentA>());
+	ASSERT_EQ(e1.getComponent<ComponentB>()->data, 2);
+}
+
+TEST_F(ECSComponentTest, GetNonExisting)
+{
+	e1.addComponent<ComponentB>();
+
+	ASSERT_FALSE(e1.getComponent<ComponentA>());
+}
+
+TEST_F(ECSComponentTest, HasExisting)
+{
+	e1.addComponent<ComponentB>();
+
+	ASSERT_TRUE(e1.hasComponent<ComponentB>());
+}
+
+TEST_F(ECSComponentTest, HasNotNonExisting)
+{
+	e1.addComponent<ComponentB>();
+
+	ASSERT_FALSE(e1.hasComponent<ComponentA>());
+}
+
+TEST_F(ECSComponentTest, HasMultiple)
+{
+	e1.addComponent<ComponentA>();
+	e1.addComponent<ComponentB>();
+
+	ASSERT_TRUE((e1.hasComponents<ComponentB, ComponentA>()));
+	ASSERT_TRUE((e1.hasComponents<ComponentA, ComponentB>()));
+}
+
+TEST_F(ECSComponentTest, HasNotMultiple)
+{
+	ecs::Component<ComponentB> b = e1.addComponent<ComponentB>();
+
+	ASSERT_FALSE((e1.hasComponents<ComponentB, ComponentA>()));
+	ASSERT_FALSE((e1.hasComponents<ComponentA, ComponentB>()));
+}
+
+TEST_F(ECSComponentTest, Removal)
+{
+	ecs::Component<ComponentA> a = e1.addComponent<ComponentA>();
+	e1.removeComponent<ComponentA>();
+
+	ASSERT_FALSE(e1.hasComponent<ComponentA>());
+}
+
+TEST_F(ECSComponentTest, InvalidAfterRemove)
+{
+	ecs::Component<ComponentA> a = e1.addComponent<ComponentA>();
+	e1.removeComponent<ComponentA>();
+
+	ASSERT_FALSE(a);
 }
 
 }}

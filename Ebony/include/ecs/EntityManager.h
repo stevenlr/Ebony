@@ -37,7 +37,7 @@ private:
 	bool isEntityValid(const Entity &entity) const;
 
 	template<typename T>
-	inline unsigned int getComponentId();
+	static inline unsigned int getComponentId();
 
 	template<typename T>
 	Pool<T> *createPool();
@@ -63,7 +63,7 @@ private:
 	template<typename T>
 	void removeComponent(const Entity &entity);
 
-	unsigned int _nbComponentTypes = 0;
+	static unsigned int _nbComponentTypes;
 	EntityId _nextEntity = 0;
 	std::vector<EntityId> _freeList;
 	std::vector<EntityVersion> _entityVersion;
@@ -91,7 +91,7 @@ namespace ebony { namespace ecs {
 template<typename T>
 inline unsigned int EntityManager::getComponentId()
 {
-	const static unsigned int id = _nbComponentTypes++;
+	static const unsigned int id = _nbComponentTypes++;
 
 	assert(id < MAX_COMPONENTS);
 

@@ -9,6 +9,15 @@ class Entity;
 class EntityManager;
 
 template<typename T>
+class Component;
+
+template<typename T0, typename T1>
+bool operator==(const Component<T0> &c0, const Component<T1> &c1);
+
+template<typename T0, typename T1>
+bool operator!=(const Component<T0> &c0, const Component<T1> &c1);
+
+template<typename T>
 class Component {
 public:
 	Component() = default;
@@ -16,7 +25,12 @@ public:
 	Component(const Entity &entity, T *component);
 
 	Component<T> &operator=(const Component<T> &component) = default;
-	bool operator==(const Component<T> &component);
+
+	template<typename T0, typename T1>
+	friend bool operator==(const Component<T0> &c0, const Component<T1> &c1);
+
+	template<typename T0, typename T1>
+	friend bool operator!=(const Component<T0> &c0, const Component<T1> &c1);
 
 	inline T *operator->() { return _component; }
 	inline const T *operator->() const { return _component; }
@@ -43,11 +57,19 @@ template<typename T>
 Component<T>::Component(const Entity &entity, T *component) :
 	_entity(entity), _component(component)
 {}
-	
-template<typename T>
-bool Component<T>::operator==(const Component<T> &component)
+
+template<typename T0, typename T1>
+bool operator==(const Component<T0> &c0, const Component<T1> &c1)
 {
-	return component._entity == _entity && component._component == _component;
+	return std::is_same<T0, T1>::value
+		&& static_cast<void *>(c0._component) == static_cast<void *>(c1._component)
+		&& c0._entity == c1._entity;
+}
+
+template<typename T0, typename T1>
+bool operator!=(const Component<T0> &c0, const Component<T1> &c1)
+{
+	return !(c0 == c1);
 }
 	
 template<typename T>
