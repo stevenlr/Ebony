@@ -184,4 +184,70 @@ TEST_F(ECSComponentTest, InvalidAfterRemove)
 	ASSERT_FALSE(a);
 }
 
+ECSRequestTest::ECSRequestTest()
+{
+	manager = ecs::EntityManager::makeInstance();
+
+	e0 = manager->create();
+
+	eab = manager->create();
+	eab.addComponent<ComponentA>();
+	eab.addComponent<ComponentB>();
+
+	ea = manager->create();
+	ea.addComponent<ComponentA>();
+
+	eb = manager->create();
+	eb.addComponent<ComponentB>();
+}
+
+TEST_F(ECSRequestTest, OneComponent)
+{
+	bool hasB = false, hasAB = false, hasOther = false;
+	ecs::EntityView view = manager->getEntitiesWith<ComponentB>();
+
+	for (ecs::Entity e : view) {
+		if (e == eb) {
+			hasB = true;
+		} else if (e == eab) {
+			hasAB = true;
+		} else {
+			hasOther = true;
+		}
+	}
+
+	ASSERT_TRUE(hasB);
+	ASSERT_TRUE(hasAB);
+	ASSERT_FALSE(hasOther);
+}
+
+TEST_F(ECSRequestTest, MultipleComponent)
+{
+	bool hasAB = false, hasOther = false;
+	ecs::EntityView view = manager->getEntitiesWith<ComponentB, ComponentA>();
+
+	for (ecs::Entity e : view) {
+		if (e == eab) {
+			hasAB = true;
+		} else {
+			hasOther = true;
+		}
+	}
+
+	ASSERT_TRUE(hasAB);
+	ASSERT_FALSE(hasOther);
+}
+
+TEST_F(ECSRequestTest, NoResult)
+{
+	bool hasFound = false;
+	ecs::EntityView view = manager->getEntitiesWith<ComponentC>();
+
+	for (ecs::Entity e : view) {
+		hasFound = true;
+	}
+
+	ASSERT_FALSE(hasFound);
+}
+
 }}

@@ -24,6 +24,17 @@ protected:
 	ecs::Entity e2;
 };
 
+class ECSRequestTest : public testing::Test {
+protected:
+	ECSRequestTest();
+
+	std::shared_ptr<ecs::EntityManager> manager;
+	ecs::Entity e0;
+	ecs::Entity eab;
+	ecs::Entity ea;
+	ecs::Entity eb;
+};
+
 struct ComponentA {
 	const char type = 'A';
 	int data;
@@ -33,6 +44,11 @@ struct ComponentB {
 	const char type = 'B';
 	int data;
 };
+
+struct ComponentC {
+	const char type = 'C';
+	int data;
+};;
 
 }}
 
