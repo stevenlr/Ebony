@@ -43,10 +43,10 @@ private:
 	Pool<T> *createPool();
 
 	template<typename T>
-	inline void createComponentMask(ComponentMask &mask);
+	inline ComponentMask createComponentMask(ComponentMask mask);
 
 	template<typename T1, typename T2, typename ... Ts>
-	inline void createComponentMask(ComponentMask &mask);
+	inline ComponentMask createComponentMask(ComponentMask mask);
 
 	template<typename ... Ts>
 	inline ComponentMask createComponentMask();
@@ -109,24 +109,24 @@ Pool<T> *EntityManager::createPool()
 }
 
 template<typename T>
-inline void EntityManager::createComponentMask(ComponentMask &mask)
+inline ComponentMask EntityManager::createComponentMask(ComponentMask mask)
 {
 	mask.set(getComponentId<T>());
+	return mask;
 }
 
 template<typename T1, typename T2, typename ... Ts>
-inline void EntityManager::createComponentMask(ComponentMask &mask)
+inline ComponentMask EntityManager::createComponentMask(ComponentMask mask)
 {
 	mask.set(getComponentId<T1>());
-	createComponentMask<T2, Ts ...>(mask);
+	mask = createComponentMask<T2, Ts ...>(mask);
+	return mask;
 }
 
 template<typename ... Ts>
 inline ComponentMask EntityManager::createComponentMask()
 {
-	static ComponentMask mask;
-
-	createComponentMask<Ts ...>(mask);
+	static ComponentMask mask = createComponentMask<Ts ...>(ComponentMask());
 
 	return mask;
 }

@@ -184,6 +184,14 @@ TEST_F(ECSComponentTest, InvalidAfterRemove)
 	ASSERT_FALSE(a);
 }
 
+TEST_F(ECSComponentTest, InvalidAfterEntityRemove)
+{
+	ecs::Component<ComponentA> a = e1.addComponent<ComponentA>();
+	e1.destroy();
+
+	ASSERT_FALSE(a);
+}
+
 ECSRequestTest::ECSRequestTest()
 {
 	manager = ecs::EntityManager::makeInstance();
