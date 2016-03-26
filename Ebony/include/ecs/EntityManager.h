@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <memory>
-#include <cassert>
 
 #include "constants.h"
 #include "utils/Pool.h"
+#include "utils/assert.h"
 
 namespace ebony { namespace ecs {
 	

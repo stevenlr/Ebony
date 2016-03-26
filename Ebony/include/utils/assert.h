@@ -28,4 +28,17 @@ private:
 		throw AssertFailureException(#test, __FILE__, __LINE__, msg);	\
 	}} while(false)
 
+#ifndef NDEBUG
+
+	#define DEBUG_ASSERT(test, msg)											\
+		do { if (!(test)) {													\
+			throw AssertFailureException(#test, __FILE__, __LINE__, msg);	\
+		}} while(false)
+
+#else
+
+	#define DEBUG_ASSERT(test, msg)	
+
+#endif
+
 #endif
