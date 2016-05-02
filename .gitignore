@@ -1,0 +1,12 @@
+.vs
+*.opensdf
+*.sdf
+*.dll
+Debug
+Release
+Dev
+libraries
+*.iml
+.idea
+ObjCompiler/*obj
+*.exe
