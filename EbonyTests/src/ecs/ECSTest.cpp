@@ -1,5 +1,7 @@
 #include "ecs/ECSTest.h"
 
+using namespace std;
+
 namespace ebony { namespace tests {
 
 using namespace ecs;

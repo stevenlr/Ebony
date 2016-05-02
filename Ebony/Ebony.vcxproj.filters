@@ -75,12 +75,6 @@
     <ClInclude Include="include\utils\assert.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\ecs\ChildrenView.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\graphics\Transform.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\graphics\opengl\shaders_utils.cpp">
@@ -123,12 +117,6 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\utils\assert.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ecs\ChildrenView.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\Transform.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

@@ -132,7 +132,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\ecs\ChildrenView.h" />
     <ClInclude Include="include\ecs\Component.h" />
     <ClInclude Include="include\ecs\constants.h" />
     <ClInclude Include="include\ecs\ecs.h" />
@@ -153,12 +152,9 @@
     <ClInclude Include="include\utils\maths.h" />
     <ClInclude Include="include\utils\perlin.h" />
     <ClInclude Include="include\utils\Pool.h" />
-    <ClInclude Include="include\graphics\Transform.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\graphics\Transform.cpp" />
     <ClCompile Include="src\3rdparty\glad.c" />
-    <ClCompile Include="src\ecs\ChildrenView.cpp" />
     <ClCompile Include="src\ecs\Entity.cpp" />
     <ClCompile Include="src\ecs\EntityManager.cpp" />
     <ClCompile Include="src\ecs\EntityView.cpp" />

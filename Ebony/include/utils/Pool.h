@@ -3,8 +3,7 @@
 
 #include <vector>
 
-#include <iostream>
-using namespace std;
+#include "assert.h"
 
 namespace ebony {
 
@@ -24,14 +23,14 @@ public:
 		_incrementSize(incrementSize)
 	{}
 
-	~Pool()
+	virtual ~Pool()
 	{
 		for (T *block : _blocks) {
 			delete[] block;
 		}
 	}
 
-	void *allocate() override
+	inline void *allocate() override
 	{
 		if (_freeList.size() == 0) {
 			grow();
@@ -43,9 +42,29 @@ public:
 		return ptr;
 	}
 
-	void free(void *ptr) override
+	inline void free(void *ptr) override
 	{
-		_freeList.push_back(static_cast<T *>(ptr));
+		T *ptrT = reinterpret_cast<T *>(ptr);
+
+#ifndef NDEBUG
+		bool found = false;
+		uintptr_t target = reinterpret_cast<uintptr_t>(ptr);
+
+		for (const T *block: _blocks) {
+			uintptr_t start	= reinterpret_cast<uintptr_t>(block);
+			uintptr_t end	= start + sizeof(T) * _incrementSize;
+
+			if (target >= start && target <= end - sizeof(T)) {
+				found = true;
+				break;
+			}
+		}
+
+		DEBUG_ASSERT(found, "Freeing object using wrong pool");
+#endif
+
+		ptrT->~T();
+		_freeList.push_back(ptrT);
 	}
 
 private:
@@ -60,9 +79,9 @@ private:
 		}
 	}
 
-	size_t _incrementSize;
-	std::vector<T *> _blocks;
-	std::vector<T *> _freeList;
+	size_t				_incrementSize;
+	std::vector<T *>	_blocks;
+	std::vector<T *>	_freeList;
 };
 
 }
