@@ -23,8 +23,6 @@ public:
 	Entity operator*() const;
 	EntityView_Iterator &operator++();
 
-	EntityId _current;
-
 private:
 	friend class EntityView;
 
@@ -35,8 +33,9 @@ private:
 
 	void goToFirstValid();
 
-	ComponentMask _mask;
-	std::weak_ptr<EntityManager> _manager;
+	EntityId						_current;
+	ComponentMask					_mask;
+	std::weak_ptr<EntityManager>	_manager;
 };
 
 class EntityView {
@@ -60,8 +59,8 @@ private:
 	EntityView() = default;
 	EntityView(std::shared_ptr<EntityManager> manager, const ComponentMask &mask);
 
-	ComponentMask _mask;
-	std::weak_ptr<EntityManager> _manager;
+	ComponentMask					_mask;
+	std::weak_ptr<EntityManager>	_manager;
 };
 
 }}

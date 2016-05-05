@@ -44,15 +44,15 @@ public:
 private:
 	void updateCache();
 
-	glm::mat4 _projection;
-	glm::mat4 _view;
-	glm::mat4 _model;
-	std::deque<glm::mat4> _modelStack;
+	glm::mat4				_projection;
+	glm::mat4				_view;
+	glm::mat4				_model;
+	std::deque<glm::mat4>	_modelStack;
 
-	bool _isDirty;
-	glm::mat4 _modelView;
-	glm::mat4 _mvp;
-	glm::mat3 _normal;
+	bool					_isDirty;
+	glm::mat4				_modelView;
+	glm::mat4				_mvp;
+	glm::mat3				_normal;
 };
 
 }

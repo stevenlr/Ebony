@@ -42,8 +42,8 @@ public:
 	void remove();
 
 private:
-	Entity _entity;
-	T *_component;
+	Entity		_entity;
+	T		*	_component;
 };
 
 }}

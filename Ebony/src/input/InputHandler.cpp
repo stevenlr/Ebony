@@ -12,19 +12,19 @@ InputHandler *InputHandler::_instance = nullptr;
 
 InputHandler::InputHandler()
 {
-	_mouseButtons.emplace(MouseButtons::Left, ButtonState());
-	_mouseButtons.emplace(MouseButtons::Right, ButtonState());
-	_mouseButtons.emplace(MouseButtons::Middle, ButtonState());
+	_mouseButtons.emplace(MouseButtons::Left,	ButtonState());
+	_mouseButtons.emplace(MouseButtons::Right,	ButtonState());
+	_mouseButtons.emplace(MouseButtons::Middle,	ButtonState());
 
-	_keyboardAliases[SDLK_ESCAPE] = KeyboardKeys::Quit;
-	_keyboardAliases[SDLK_z] = KeyboardKeys::Forward;
-	_keyboardAliases[SDLK_s] = KeyboardKeys::Backward;
-	_keyboardAliases[SDLK_q] = KeyboardKeys::Left;
-	_keyboardAliases[SDLK_d] = KeyboardKeys::Right;
-	_keyboardAliases[SDLK_SPACE] = KeyboardKeys::Up;
-	_keyboardAliases[SDLK_LSHIFT] = KeyboardKeys::Down;
+	_keyboardAliases[SDLK_ESCAPE]	= KeyboardKeys::Quit;
+	_keyboardAliases[SDLK_z]		= KeyboardKeys::Forward;
+	_keyboardAliases[SDLK_s]		= KeyboardKeys::Backward;
+	_keyboardAliases[SDLK_q]		= KeyboardKeys::Left;
+	_keyboardAliases[SDLK_d]		= KeyboardKeys::Right;
+	_keyboardAliases[SDLK_SPACE]	= KeyboardKeys::Up;
+	_keyboardAliases[SDLK_LSHIFT]	= KeyboardKeys::Down;
 
-	for (pair<SDL_Keycode, KeyboardKeys::Aliases> key : _keyboardAliases) {
+	for (const pair<SDL_Keycode, KeyboardKeys::Aliases> &key : _keyboardAliases) {
 		_keyboardButtons.emplace(key.second, ButtonState());
 	}
 }
@@ -44,11 +44,11 @@ void InputHandler::update()
 {
 	static SDL_Event event;
 
-	_mouseMotionX = 0;
-	_mouseMotionY = 0;
-	_mouseWheelScrollX = 0;
-	_mouseWheelScrollY = 0;
-	_quit = false;
+	_mouseMotionX		= 0;
+	_mouseMotionY		= 0;
+	_mouseWheelScrollX	= 0;
+	_mouseWheelScrollY	= 0;
+	_quit				= false;
 
 	for (const pair<MouseButtons::Aliases, ButtonState> &button : _mouseButtons) {
 		_mouseButtons[button.first].reset();

@@ -11,9 +11,9 @@ namespace ebony { namespace input {
 
 namespace MouseButtons {
 enum Aliases {
-	Left = SDL_BUTTON_LEFT,
-	Right = SDL_BUTTON_RIGHT,
-	Middle = SDL_BUTTON_MIDDLE
+	Left		= SDL_BUTTON_LEFT,
+	Right		= SDL_BUTTON_RIGHT,
+	Middle		= SDL_BUTTON_MIDDLE
 };
 }
 
@@ -31,26 +31,26 @@ enum Aliases {
 
 class InputHandler {
 	struct ButtonState {
-		bool pressed = false;
-		bool released = false;
-		bool isDown = false;
+		bool pressed	= false;
+		bool released	= false;
+		bool isDown		= false;
 
 		inline void reset()
 		{
-			pressed = false;
-			released = false;
+			pressed		= false;
+			released	= false;
 		}
 
 		inline void press()
 		{
-			pressed = true;
-			isDown = true;
+			pressed		= true;
+			isDown		= true;
 		}
 
 		inline void release()
 		{
-			released = true;
-			isDown = false;
+			released	= true;
+			isDown		= false;
 		}
 	};
 

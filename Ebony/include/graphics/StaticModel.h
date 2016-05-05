@@ -14,12 +14,14 @@ public:
 	StaticModel(const StaticModel &model) = default;
 	~StaticModel() = default;
 
+	StaticModel &operator=(const StaticModel &model) = default;
+
 	void draw(int n = 1) const;
 
 private:
-	std::shared_ptr<gl::VertexArray> _vao;
-	std::shared_ptr<gl::Buffer> _vbo;
-	int _nbFaces;
+	std::shared_ptr<gl::VertexArray>	_vao;
+	std::shared_ptr<gl::Buffer>			_vbo;
+	int									_nbFaces;
 };
 
 }

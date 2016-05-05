@@ -45,9 +45,9 @@ public:
 private:
 	friend class EntityManager;
 
-	std::weak_ptr<EntityManager> _manager;
-	EntityId _id;
-	EntityVersion _version;
+	std::weak_ptr<EntityManager>	_manager;
+	EntityId						_id;
+	EntityVersion					_version;
 };
 
 }}
