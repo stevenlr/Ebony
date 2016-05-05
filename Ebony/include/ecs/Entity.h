@@ -36,6 +36,8 @@ public:
 	template<typename T>
 	void removeComponent();
 
+	void removeAllComponents();
+
 	template<typename T>
 	bool hasComponent();
 

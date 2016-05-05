@@ -63,6 +63,8 @@ private:
 	template<typename T>
 	void removeComponent(const Entity &entity);
 
+	void removeAllComponents(const Entity &entity);
+
 	static unsigned int _nbComponentTypes;
 	EntityId _nextEntity = 0;
 	std::vector<EntityId> _freeList;
@@ -160,13 +162,14 @@ Component<T> EntityManager::addComponent(const Entity &entity)
 		accomodateComponents();
 	}
 
-	Pool<T> *pool = static_cast<Pool<T> *>(_componentPools[id]);
+	Pool<T> *pool = dynamic_cast<Pool<T> *>(_componentPools[id]);
 
 	if (!pool) {
 		pool = createPool<T>();
+		_componentPools[id] = dynamic_cast<IPool *>(pool);
 	}
 
-	T *componentPtr = static_cast<T *>(pool->allocate());
+	T *componentPtr = new(pool->allocate()) T();
 
 	_componentMasks[entity._id].set(id);
 	_components[id][entity._id] = componentPtr;

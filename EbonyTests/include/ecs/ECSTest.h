@@ -48,7 +48,23 @@ struct ComponentB {
 struct ComponentC {
 	const char type = 'C';
 	int data;
-};;
+};
+
+struct DestructableComponent {
+	DestructableComponent()
+	{
+		destroyed = false;
+		constructed = true;
+	}
+
+	~DestructableComponent()
+	{
+		destroyed = true;
+	}
+
+	bool destroyed;
+	bool constructed;
+};
 
 }}
 

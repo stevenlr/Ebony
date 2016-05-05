@@ -58,4 +58,13 @@ void Entity::destroy()
 	}
 }
 
+void Entity::removeAllComponents()
+{
+	shared_ptr<EntityManager> manager = _manager.lock();
+
+	if (manager) {
+		manager->removeAllComponents(*this);
+	}
+}
+
 }}

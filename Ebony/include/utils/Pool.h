@@ -17,7 +17,7 @@ public:
 };
 
 template<typename T>
-class Pool : IPool {
+class Pool : public IPool {
 public:
 	Pool(size_t incrementSize = 256) :
 		_incrementSize(incrementSize)
@@ -25,8 +25,8 @@ public:
 
 	virtual ~Pool()
 	{
-		for (T *block : _blocks) {
-			delete[] block;
+		for (void *block : _blocks) {
+			::operator delete(block);
 		}
 	}
 
@@ -50,7 +50,7 @@ public:
 		bool found = false;
 		uintptr_t target = reinterpret_cast<uintptr_t>(ptr);
 
-		for (const T *block: _blocks) {
+		for (const void *block: _blocks) {
 			uintptr_t start	= reinterpret_cast<uintptr_t>(block);
 			uintptr_t end	= start + sizeof(T) * _incrementSize;
 
@@ -70,17 +70,17 @@ public:
 private:
 	void grow()
 	{
-		T *block = new T[_incrementSize];
+		T *block = reinterpret_cast<T *>(::operator new(sizeof(T) * _incrementSize));
 
 		_blocks.push_back(block);
 
 		for (size_t i = 0; i < _incrementSize; ++i) {
-			_freeList.push_back(block + i);
+			_freeList.push_back(block++);
 		}
 	}
 
 	size_t				_incrementSize;
-	std::vector<T *>	_blocks;
+	std::vector<void *>	_blocks;
 	std::vector<T *>	_freeList;
 };
 

@@ -194,6 +194,54 @@ TEST_F(ECSComponentTest, InvalidAfterEntityRemove)
 	ASSERT_FALSE(a);
 }
 
+TEST_F(ECSComponentTest, CallDefaultConstructorOnAddComponent)
+{
+	ecs::Component<DestructableComponent> a = e1.addComponent<DestructableComponent>();
+
+	ASSERT_FALSE(a->destroyed);
+	ASSERT_TRUE(a->constructed);
+}
+
+TEST_F(ECSComponentTest, CallDestructorOnRemoveComponent)
+{
+	ecs::Component<DestructableComponent> a = e1.addComponent<DestructableComponent>();
+
+	e1.removeComponent<DestructableComponent>();
+
+	ASSERT_TRUE(a->destroyed);
+	ASSERT_TRUE(a->constructed);
+}
+
+TEST_F(ECSComponentTest, CallDestructorOnDestroyEntity)
+{
+	ecs::Component<DestructableComponent> a = e1.addComponent<DestructableComponent>();
+
+	e1.destroy();
+
+	ASSERT_TRUE(a->destroyed);
+	ASSERT_TRUE(a->constructed);
+}
+
+TEST_F(ECSComponentTest, RemoveAllComponents)
+{
+	e1.addComponent<ComponentA>();
+	e1.addComponent<ComponentB>();
+
+	e1.removeAllComponents();
+
+	ASSERT_FALSE(e1.hasComponent<ComponentA>());
+	ASSERT_FALSE(e1.hasComponent<ComponentB>());
+}
+
+TEST_F(ECSComponentTest, RemoveAllComponentsCallsDestructor)
+{
+	ecs::Component<DestructableComponent> a = e1.addComponent<DestructableComponent>();
+
+	e1.removeAllComponents();
+
+	ASSERT_TRUE(a->destroyed);
+}
+
 ECSRequestTest::ECSRequestTest()
 {
 	manager = ecs::EntityManager::makeInstance();

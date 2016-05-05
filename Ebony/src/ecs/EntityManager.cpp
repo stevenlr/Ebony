@@ -39,16 +39,35 @@ Entity EntityManager::create()
 
 void EntityManager::destroy(Entity &entity)
 {
-	if (!entity || entity._manager.lock() != shared_from_this()) {
+	if (!isEntityValid(entity)) {
 		return;
 	}
+
+	removeAllComponents(entity);
 
 	if (++_entityVersion[entity._id] != 0) {
 		_freeList.push_back(entity._id);
 	}
 
-	_componentMasks[entity._id].reset();
 	entity._manager.reset();
+}
+
+void EntityManager::removeAllComponents(const Entity &entity)
+{
+	if (!isEntityValid(entity)) {
+		return;
+	}
+
+	ComponentMask mask = _componentMasks[entity._id];
+
+	for (size_t i = 0; i < MAX_COMPONENTS; ++i) {
+		if (mask.test(i)) {
+			_componentPools[i]->free(_components[i][entity._id]);
+			_components[i][entity._id] = nullptr;
+		}
+	}
+
+	_componentMasks[entity._id].reset();
 }
 
 bool EntityManager::isEntityValid(const Entity &entity) const
@@ -73,7 +92,7 @@ void EntityManager::growCapacity()
 	_entityVersion.resize(newSize, 0);
 	_componentMasks.resize(newSize, ComponentMask());
 
-	for (vector<void *> components : _components) {
+	for (vector<void *> &components : _components) {
 		components.resize(newSize, nullptr);
 	}
 }
