@@ -1,10 +1,5 @@
+#include "stdafx.h"
 #include "graphics/opengl/textures_utils.h"
-
-#include <cstdint>
-#include <cstdlib>
-#include <iostream>
-
-#include <stb_image.h>
 
 #include "utils/assert.h"
 #include "graphics/opengl/opengl.h"

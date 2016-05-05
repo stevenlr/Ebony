@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ecs/EntityView.h"
 
 #include "ecs/EntityManager.h"

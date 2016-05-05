@@ -1,7 +1,5 @@
+#include "stdafx.h"
 #include "graphics/TransformPipeline.h"
-
-#include <glm/gtc/matrix_inverse.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 using namespace std;
 using namespace glm;

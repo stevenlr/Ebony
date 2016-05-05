@@ -1,7 +1,5 @@
+#include "stdafx.h"
 #include "utils/perlin.h"
-
-#include <cstdint>
-#include <algorithm>
 
 using namespace std;
 

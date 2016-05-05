@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "FPSCamera.h"
 
 #include "input/InputHandler.h"

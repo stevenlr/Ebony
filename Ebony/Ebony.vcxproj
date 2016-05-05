@@ -92,8 +92,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -147,6 +146,7 @@
     <ClInclude Include="include\graphics\StaticModel.h" />
     <ClInclude Include="include\graphics\TransformPipeline.h" />
     <ClInclude Include="include\input\InputHandler.h" />
+    <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\utils\assert.h" />
     <ClInclude Include="include\utils\io.h" />
     <ClInclude Include="include\utils\maths.h" />
@@ -164,6 +164,9 @@
     <ClCompile Include="src\graphics\StaticModel.cpp" />
     <ClCompile Include="src\graphics\TransformPipeline.cpp" />
     <ClCompile Include="src\input\InputHandler.cpp" />
+    <ClCompile Include="src\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\utils\assert.cpp" />
     <ClCompile Include="src\utils\io.cpp" />
     <ClCompile Include="src\utils\perlin.cpp" />

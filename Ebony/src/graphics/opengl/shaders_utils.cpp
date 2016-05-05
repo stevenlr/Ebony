@@ -1,12 +1,5 @@
+#include "stdafx.h"
 #include "graphics/opengl/shaders_utils.h"
-
-#include <vector>
-#include <memory>
-#include <sstream>
-#include <iostream>
-
-#include <glad/glad.h>
-#include <tinyxml2.h>
 
 #include "utils/io.h"
 

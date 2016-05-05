@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "utils/io.h"
-
-#include <fstream>
 
 #include "utils/assert.h"
 

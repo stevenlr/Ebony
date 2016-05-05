@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "utils/assert.h"
-
-#include <sstream>
 
 using namespace std;
 

@@ -1,8 +1,5 @@
+#include "stdafx.h"
 #include "graphics/StaticModel.h"
-
-#include <fstream>
-#include <iostream>
-#include <zlib.h>
 
 #include "utils/io.h"
 #include "utils/assert.h"

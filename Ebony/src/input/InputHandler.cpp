@@ -1,8 +1,5 @@
+#include "stdafx.h"
 #include "input/InputHandler.h"
-
-#include <stdexcept>
-
-#include <SDL2/SDL.h>
 
 using namespace std;
 
