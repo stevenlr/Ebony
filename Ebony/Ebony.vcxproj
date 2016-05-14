@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Ebony.h" />
     <ClInclude Include="include\ecs\Component.h" />
     <ClInclude Include="include\ecs\constants.h" />
     <ClInclude Include="include\ecs\ecs.h" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\3rdparty\glad.c" />
+    <ClCompile Include="src\Ebony.cpp" />
     <ClCompile Include="src\ecs\Entity.cpp" />
     <ClCompile Include="src\ecs\EntityManager.cpp" />
     <ClCompile Include="src\ecs\EntityView.cpp" />
