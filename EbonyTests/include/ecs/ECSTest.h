@@ -57,7 +57,7 @@ struct DestructableComponent {
 		constructed = true;
 	}
 
-	~DestructableComponent()
+	virtual ~DestructableComponent()
 	{
 		destroyed = true;
 	}

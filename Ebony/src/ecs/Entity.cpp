@@ -3,8 +3,6 @@
 
 #include "ecs/EntityManager.h"
 
-using namespace std;
-
 namespace ebony { namespace ecs {
 
 Entity::Entity(std::shared_ptr<EntityManager> manager, EntityId id, EntityVersion version) :
@@ -17,8 +15,8 @@ Entity::Entity(std::weak_ptr<EntityManager> manager, EntityId id, EntityVersion 
 
 bool Entity::operator==(const Entity &entity) const
 {
-	shared_ptr<EntityManager> manager1 = _manager.lock();
-	shared_ptr<EntityManager> manager2 = entity._manager.lock();
+	std::shared_ptr<EntityManager> manager1 = _manager.lock();
+	std::shared_ptr<EntityManager> manager2 = entity._manager.lock();
 
 	if (!manager1 || !manager2) {
 		return false;
@@ -39,7 +37,7 @@ Entity::operator bool() const
 
 bool Entity::isValid() const
 {
-	shared_ptr<EntityManager> manager = _manager.lock();
+	std::shared_ptr<EntityManager> manager = _manager.lock();
 
 	if (!manager) {
 		return false;
@@ -50,7 +48,7 @@ bool Entity::isValid() const
 
 void Entity::destroy()
 {
-	shared_ptr<EntityManager> manager = _manager.lock();
+	std::shared_ptr<EntityManager> manager = _manager.lock();
 
 	if (manager) {
 		manager->destroy(*this);
@@ -60,7 +58,7 @@ void Entity::destroy()
 
 void Entity::removeAllComponents()
 {
-	shared_ptr<EntityManager> manager = _manager.lock();
+	std::shared_ptr<EntityManager> manager = _manager.lock();
 
 	if (manager) {
 		manager->removeAllComponents(*this);

@@ -4,8 +4,6 @@
 #include "ecs/EntityManager.h"
 #include "utils/assert.h"
 
-using namespace std;
-
 namespace ebony { namespace ecs {
 
 EntityView_Iterator::EntityView_Iterator(const EntityView_Iterator &it) :
@@ -24,9 +22,9 @@ EntityView_Iterator &EntityView_Iterator::operator=(const EntityView_Iterator &i
 	return *this;
 }
 
-EntityView_Iterator::EntityView_Iterator(weak_ptr<EntityManager> manager,
-											const ComponentMask &mask,
-											EntityId current) :
+EntityView_Iterator::EntityView_Iterator(std::weak_ptr<EntityManager> manager,
+										 const ComponentMask &mask,
+										 EntityId current) :
 	_mask(mask), _manager(manager), _current(current)
 {
 	goToFirstValid();
@@ -63,7 +61,7 @@ EntityView_Iterator &EntityView_Iterator::operator++()
 
 void EntityView_Iterator::goToFirstValid()
 {
-	shared_ptr<EntityManager> manager = _manager.lock();
+	std::shared_ptr<EntityManager> manager = _manager.lock();
 
 	while (_current < manager->_nextEntity) {
 		if ((manager->_componentMasks[_current] & _mask) == _mask) {
@@ -74,8 +72,8 @@ void EntityView_Iterator::goToFirstValid()
 	}
 }
 
-EntityView::EntityView(shared_ptr<EntityManager> manager,
-										const ComponentMask &mask) :
+EntityView::EntityView(std::shared_ptr<EntityManager> manager,
+					   const ComponentMask &mask) :
 	_mask(mask), _manager(manager)
 {}
 

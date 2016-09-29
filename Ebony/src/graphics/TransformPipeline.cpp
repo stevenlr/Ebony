@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "graphics/TransformPipeline.h"
 
-using namespace std;
 using namespace glm;
 
 namespace ebony {

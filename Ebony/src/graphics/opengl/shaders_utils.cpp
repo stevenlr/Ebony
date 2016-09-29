@@ -3,7 +3,6 @@
 
 #include "utils/io.h"
 
-using namespace std;
 using namespace tinyxml2;
 
 namespace ebony { namespace gl {
@@ -39,8 +38,8 @@ bool linkProgramFromXml(const Program &program, const std::string &xmlSource, st
 	const char *sourceString = &*xmlSource.cbegin();
 	size_t size = xmlSource.size();
 	XMLDocument document;
-	vector<shared_ptr<gl::Shader>> shaders;
-	string subError, subSource;
+	std::vector<std::unique_ptr<gl::Shader>> shaders;
+	std::string subError, subSource;
 
 	document.Parse(sourceString, size);
 
@@ -48,7 +47,7 @@ bool linkProgramFromXml(const Program &program, const std::string &xmlSource, st
 	const XMLElement *element = root->FirstChildElement("shader");
 
 	do {
-		string shaderPath = "assets/shaders/";
+		std::string shaderPath = "assets/shaders/";
 		const char *typeString = element->Attribute("type");
 		ShaderType type;
 
@@ -75,15 +74,15 @@ bool linkProgramFromXml(const Program &program, const std::string &xmlSource, st
 				continue;
 		}
 
-		shared_ptr<gl::Shader> shader(new gl::Shader(type));
+		std::unique_ptr<gl::Shader> shader(new gl::Shader(type));
 
 		subSource.clear();
 
 		if (!readFile(shaderPath, &subSource)) {
 			if (error) {
-				stringstream sstr;
+				std::stringstream sstr;
 
-				sstr << "Error reading file " << shaderPath << endl;
+				sstr << "Error reading file " << shaderPath << std::endl;
 				*error = sstr.str();
 			}
 
@@ -92,18 +91,18 @@ bool linkProgramFromXml(const Program &program, const std::string &xmlSource, st
 			
 		if (!compileShaderFromSource(*shader, subSource, &subError)) {
 			if (error) {
-				stringstream sstr;
+				std::stringstream sstr;
 
-				sstr << "Error compiling " << typeString << " shader " << element->GetText() << ": " << endl;
-				sstr << subError << endl;
+				sstr << "Error compiling " << typeString << " shader " << element->GetText() << ": " << std::endl;
+				sstr << subError << std::endl;
 				*error = sstr.str();
 			}
 
 			return false;
 		}
 
-		shaders.push_back(shader);
 		glAttachShader(program, *shader);
+		shaders.push_back(std::move(shader));
 	} while (element = element->NextSiblingElement("shader"));
 
 	element = root->FirstChildElement("attribute");

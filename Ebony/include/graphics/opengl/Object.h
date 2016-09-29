@@ -8,8 +8,8 @@
 namespace ebony { namespace gl {
 
 struct BufferTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -25,8 +25,8 @@ struct BufferTraits {
 };
 
 struct VertexArrayTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -42,8 +42,8 @@ struct VertexArrayTraits {
 };
 
 struct FramebufferTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -59,8 +59,8 @@ struct FramebufferTraits {
 };
 
 struct RenderbufferTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -76,8 +76,8 @@ struct RenderbufferTraits {
 };
 
 struct TextureTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -93,8 +93,8 @@ struct TextureTraits {
 };
 
 struct SamplerTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -110,8 +110,8 @@ struct SamplerTraits {
 };
 
 struct QueryTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -127,8 +127,8 @@ struct QueryTraits {
 };
 
 struct ProgramTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create()
 	{
@@ -142,8 +142,8 @@ struct ProgramTraits {
 };
 
 struct ShaderTraits {
-	typedef GLuint ValueType;
-	static const ValueType nullValue = 0;
+	using ValueType = GLuint;
+	static constexpr ValueType nullValue = 0;
 
 	static ValueType create(ShaderType type)
 	{
@@ -160,17 +160,13 @@ template<typename T>
 class Object {
 public:
 	Object() : _obj(T::create()) {}
-	Object(const Object<T> &obj) : _obj(obj._obj) {}
 	~Object() { T::destroy(_obj); }
 
-	operator typename T::ValueType() const { return _obj; }
-	operator bool() const { return _obj != T::nullValue; }
+	constexpr operator typename T::ValueType() const { return _obj; }
+	constexpr operator bool() const { return _obj != T::nullValue; }
 
-	Object<T> &operator=(const Object<T> &obj)
-	{
-		_obj = obj;
-		return *this;
-	}
+	Object(const Object<T> &) = delete;
+	Object<T> &operator=(const Object<T> &) = delete;
 
 private:
 	typename T::ValueType _obj;
@@ -180,31 +176,27 @@ template<>
 class Object<ShaderTraits> {
 public:
 	Object(ShaderType type) : _obj(ShaderTraits::create(type)) {}
-	Object(const Object<ShaderTraits> &obj) : _obj(obj._obj) {}
 	~Object() { ShaderTraits::destroy(_obj); }
 
 	operator ShaderTraits::ValueType() const { return _obj; }
 	operator bool() const { return _obj != ShaderTraits::nullValue; }
 
-	Object<ShaderTraits> &operator=(const Object<ShaderTraits> &obj)
-	{
-		_obj = obj._obj;
-		return *this;
-	}
+	Object(const Object<ShaderTraits> &obj) = delete;
+	Object<ShaderTraits> &operator=(const Object<ShaderTraits> &obj) =	delete;
 
 private:
 	ShaderTraits::ValueType _obj;
 };
 
-typedef Object<BufferTraits> Buffer;
-typedef Object<VertexArrayTraits> VertexArray;
-typedef Object<FramebufferTraits> Framebuffer;
-typedef Object<RenderbufferTraits> Renderbuffer;
-typedef Object<TextureTraits> Texture;
-typedef Object<SamplerTraits> Sampler;
-typedef Object<QueryTraits> Query;
-typedef Object<ProgramTraits> Program;
-typedef Object<ShaderTraits> Shader;
+using Buffer			= Object<BufferTraits>;
+using VertexArray		= Object<VertexArrayTraits>;
+using Framebuffer		= Object<FramebufferTraits>;
+using Renderbuffer		= Object<RenderbufferTraits>;
+using Texture			= Object<TextureTraits>;
+using Sampler			= Object<SamplerTraits>;
+using Query				= Object<QueryTraits>;
+using Program			= Object<ProgramTraits>;
+using Shader			= Object<ShaderTraits>;
 
 }}
 

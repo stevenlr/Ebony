@@ -6,20 +6,19 @@
 
 #define CHUNK 16384
 
-using namespace std;
 using namespace ebony;
 
 namespace {
 
-int inf(ifstream &source, uint8_t **dest)
+uint32_t inf(std::ifstream &source, std::unique_ptr<uint8_t[]> &dest)
 {
 	int ret;
 	unsigned have;
 	z_stream strm;
 	unsigned char in[CHUNK];
 	unsigned char out[CHUNK];
-	uint8_t *destptr;
-	int nbFaces = -1;
+	uint8_t *destptr = nullptr;
+	uint32_t nbFaces = 0;
 
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
@@ -27,10 +26,12 @@ int inf(ifstream &source, uint8_t **dest)
 	strm.avail_in = 0;
 	strm.next_in = Z_NULL;
 	ret = inflateInit(&strm);
-	*dest = destptr = nullptr;
 
-	if (ret != Z_OK)
+	dest.reset(nullptr);
+
+	if (ret != Z_OK) {
 		return -1;
+	}
 
 	do {
 		source.read(reinterpret_cast<char *>(in), CHUNK);
@@ -39,7 +40,7 @@ int inf(ifstream &source, uint8_t **dest)
 		if (source.bad()) {
 			inflateEnd(&strm);
 			delete destptr;
-			return -2;
+			return 0;
 		}
 
 		if (strm.avail_in == 0) {
@@ -60,18 +61,17 @@ int inf(ifstream &source, uint8_t **dest)
 			case Z_DATA_ERROR:
 			case Z_MEM_ERROR:
 				inflateEnd(&strm);
-				return -3;
+				return 0;
 			}
 
 			if (!destptr) {
-				nbFaces = *reinterpret_cast<int32_t *>(out);
-				destptr = new uint8_t[nbFaces * 33 * sizeof(GLfloat) + 4];
-				*dest = destptr;
+				nbFaces = *reinterpret_cast<uint32_t *>(out);
+				dest.reset(new uint8_t[nbFaces * 33 * sizeof(GLfloat) + 4]);
+				destptr = dest.get();
 			}
 
 			have = CHUNK - strm.avail_out;
-
-			copy_n(reinterpret_cast<uint8_t *>(out), have, destptr);
+			std::copy_n(reinterpret_cast<uint8_t *>(out), have, destptr);
 			destptr += have;
 		} while (strm.avail_out == 0);
 	} while (ret != Z_STREAM_END);
@@ -85,24 +85,24 @@ int inf(ifstream &source, uint8_t **dest)
 
 namespace ebony {
 
-StaticModel::StaticModel(const string &filename)
+StaticModel::StaticModel(const std::string &filename)
 {
-	_vao = make_shared<gl::VertexArray>();
-	_vbo = make_shared<gl::Buffer>();
+	_vao.reset(new gl::VertexArray);
+	_vbo.reset(new gl::Buffer);
 
-	ifstream source;
-	uint8_t *data;
+	std::ifstream source;
+	std::unique_ptr<uint8_t[]> data;
 
-	source.open(filename, ios_base::in | ios_base::binary);
+	source.open(filename, std::ios_base::in | std::ios_base::binary);
 	ASSERT(source.is_open(), "Opening model file");
 
-	_nbFaces = inf(source, &data);
-	ASSERT(_nbFaces >= 0, "Reading model file");
+	_nbFaces = inf(source, data);
+	ASSERT(_nbFaces > 0, "Reading model file");
 
 	glBindVertexArray(*_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, *_vbo);
 
-	glBufferData(GL_ARRAY_BUFFER, _nbFaces * 3 * 11 * sizeof(GLfloat), data + 4, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, _nbFaces * 3 * 11 * sizeof(GLfloat), data.get() + 4, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -116,11 +116,9 @@ StaticModel::StaticModel(const string &filename)
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	delete[] data;
 }
 
-void StaticModel::draw(int n) const
+void StaticModel::draw(uint32_t n) const
 {
 	glBindVertexArray(*_vao);
 	glDrawArrays(GL_TRIANGLES, 0, _nbFaces * 3);

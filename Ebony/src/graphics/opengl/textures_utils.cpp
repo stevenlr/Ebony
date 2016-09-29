@@ -1,21 +1,27 @@
 #include "stdafx.h"
 #include "graphics/opengl/textures_utils.h"
 
+#include <functional>
+
 #include "utils/assert.h"
 #include "graphics/opengl/opengl.h"
 
-using namespace std;
-
 namespace ebony { namespace gl {
 
-bool getImageData(const string &filename, string *error,
-				  uint8_t **data,
+namespace {
+
+using unique_ptr_stbi = std::unique_ptr<uint8_t[], std::function<decltype(stbi_image_free)>>;
+
+}
+
+bool getImageData(const std::string &filename, std::string *error,
+				  unique_ptr_stbi &data,
 				  int *width, int *height, int *components,
 				  GLenum *internalFormat, GLenum *format)
 {
-	ASSERT(data && width && height && components && internalFormat && format, "");
+	ASSERT(width && height && components && internalFormat && format, "");
 
-	*data = stbi_load(filename.c_str(), width, height, components, 0);
+	data.reset(stbi_load(filename.c_str(), width, height, components, 0));
 
 	if (!data) {
 		if (error) {
@@ -57,30 +63,28 @@ bool getImageData(const string &filename, string *error,
 	return true;
 }
 
-bool loadTextureFromFile(const Texture &texture, const string &filename, string *error)
+bool loadTextureFromFile(const Texture &texture, const std::string &filename, std::string *error)
 {
 	int width, height, components;
 	GLenum internalFormat, format;
-	uint8_t *data;
+	unique_ptr_stbi data(static_cast<uint8_t *>(nullptr), stbi_image_free);
 
-	if (!getImageData(filename, error, &data, &width, &height, &components, &internalFormat, &format)) {
+	if (!getImageData(filename, error, data, &width, &height, &components, &internalFormat, &format)) {
 		return false;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data.get());
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	free(data);
 
 	return true;
 }
 
-bool loadCubemapFromDirectory(const Texture &texture, const string &dirname, string *error)
+bool loadCubemapFromDirectory(const Texture &texture, const std::string &dirname, std::string *error)
 {
-	static const string sidesStr[6] = {
-		string("posx.png"), string("posy.png"), string("posz.png"),
-		string("negx.png"), string("negy.png"), string("negz.png")
+	static const std::string sidesStr[6] = {
+		std::string("posx.png"), std::string("posy.png"), std::string("posz.png"),
+		std::string("negx.png"), std::string("negy.png"), std::string("negz.png")
 	};
 
 	static const GLuint sidesGl[6] {
@@ -91,19 +95,18 @@ bool loadCubemapFromDirectory(const Texture &texture, const string &dirname, str
 
 	int width, height, components;
 	GLenum internalFormat, format;
-	uint8_t *data;
+	unique_ptr_stbi data(static_cast<uint8_t *>(nullptr), stbi_image_free);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
 	for (int i = 0; i < 6; ++i) {
-		string filename = dirname + "/" + sidesStr[i];
+		std::string filename = dirname + "/" + sidesStr[i];
 
-		if (!getImageData(filename, error, &data, &width, &height, &components, &internalFormat, &format)) {
+		if (!getImageData(filename, error, data, &width, &height, &components, &internalFormat, &format)) {
 			return false;
 		}
 
-		glTexImage2D(sidesGl[i], 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		free(data);
+		glTexImage2D(sidesGl[i], 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data.get());
 	}
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

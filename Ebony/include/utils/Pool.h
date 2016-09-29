@@ -2,6 +2,8 @@
 #define EBONY_UTILS_POOL_H_
 
 #include <vector>
+#include <memory>
+#include <functional>
 
 #include "assert.h"
 
@@ -18,17 +20,17 @@ public:
 
 template<typename T>
 class Pool : public IPool {
+private:
+
+	using unique_ptr_block = std::unique_ptr<T, std::function<void (T *)>>;
+
 public:
 	Pool(size_t incrementSize = 256) :
 		_incrementSize(incrementSize)
 	{}
 
 	virtual ~Pool()
-	{
-		for (void *block : _blocks) {
-			::operator delete(block);
-		}
-	}
+	{}
 
 	inline void *allocate() override
 	{
@@ -50,8 +52,8 @@ public:
 		bool found = false;
 		uintptr_t target = reinterpret_cast<uintptr_t>(ptr);
 
-		for (const void *block: _blocks) {
-			uintptr_t start	= reinterpret_cast<uintptr_t>(block);
+		for (unique_ptr_block &block: _blocks) {
+			uintptr_t start	= reinterpret_cast<uintptr_t>(block.get());
 			uintptr_t end	= start + sizeof(T) * _incrementSize;
 
 			if (target >= start && target <= end - sizeof(T)) {
@@ -72,16 +74,16 @@ private:
 	{
 		T *block = reinterpret_cast<T *>(::operator new(sizeof(T) * _incrementSize));
 
-		_blocks.push_back(block);
+		_blocks.push_back(std::move(unique_ptr_block(block, [] (T *ptr) { ::operator delete(ptr); })));
 
 		for (size_t i = 0; i < _incrementSize; ++i) {
 			_freeList.push_back(block++);
 		}
 	}
 
-	size_t				_incrementSize;
-	std::vector<void *>	_blocks;
-	std::vector<T *>	_freeList;
+	const size_t						_incrementSize;
+	std::vector<unique_ptr_block>		_blocks;
+	std::vector<T *>					_freeList;
 };
 
 }
